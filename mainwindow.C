@@ -174,6 +174,7 @@ void MainWindow::init_gui()
   statusBar()->showMessage("Creating workspace...");
 
   resize(800, 600);
+  setWindowIcon(QIcon(":icon/app-icon"));
 
   statusBar()->showMessage("GUI created successfully", STATUS_BAR_TIME);
 }
@@ -196,18 +197,28 @@ void MainWindow::save_file()
 
 void MainWindow::set_title()
 {
-  QString title = QString::asprintf("Pixedrawing [%lu x %lu]",
-                                    drawing_panel->get_cols(),
-                                    drawing_panel->get_rows());
+  QString title;
+
+  if (not is_saved)
+    title.append("*");
+
+  title.append(QString::asprintf("Pixedrawing [%lu x %lu]",
+                                 drawing_panel->get_cols(),
+                                 drawing_panel->get_rows()));
+
+  title.append(" (");
+
   if (not name.isEmpty())
     {
       QFileInfo file_info(name);
-      title.append(" (");
       title.append(file_info.baseName());
       title.append(".");
       title.append(file_info.suffix());
-      title.append(")");
     }
+  else
+    title.append("New work");
+
+  title.append(")");
 
   setWindowTitle(title);
 }
@@ -261,6 +272,7 @@ void MainWindow::closeEvent(QCloseEvent *)
 void MainWindow::slot_changed()
 {
   is_saved = false;
+  set_title();
 }
 
 void MainWindow::slot_new()
@@ -285,15 +297,16 @@ void MainWindow::slot_save_as()
   QString ext = "*.";
   ext.append(EXT);
 
-  name = QFileDialog::getSaveFileName(this, "Save file as",
+  QString filename = QFileDialog::getSaveFileName(this, "Save file as",
                                       last_visited_path, ext);
 
-  if (name.isEmpty())
+  if (filename.isEmpty())
     {
       statusBar()->showMessage("File not saved", STATUS_BAR_TIME);
       return;
     }
 
+  name = filename;
   QFileInfo file_info(name);
 
   if (file_info.suffix() != EXT)
@@ -313,14 +326,15 @@ void MainWindow::slot_open()
   QString ext = "*.";
   ext.append(EXT);
 
-  name = QFileDialog::getOpenFileName(this, "Open file",
+  QString filename = QFileDialog::getOpenFileName(this, "Open file",
                                       last_visited_path, ext);
-  if (name.isEmpty())
+  if (filename.isEmpty())
     {
       statusBar()->showMessage("File not opened", STATUS_BAR_TIME);
       return;
     }
 
+  name = filename;
   slot_new();
 
   try
