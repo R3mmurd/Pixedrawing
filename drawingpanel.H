@@ -71,6 +71,8 @@ public:
 
   const size_t & get_cols() const;
 
+  const QColor & get_color_to_paint() const;
+
   void set_color_to_paint(const QColor &);
 
   void save_to_file(QString &);
