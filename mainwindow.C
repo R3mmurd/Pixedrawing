@@ -256,6 +256,53 @@ void MainWindow::close_work()
   drawing_panel = nullptr;
 }
 
+int MainWindow::color_position(const QColor & color) const
+{
+  for (int i = 1; i <= recent_colors.size(); ++i)
+    if (recent_colors[actions_pick_color[i]->data().toInt()] == color)
+      return i - 1;
+
+  return -1;
+}
+
+void MainWindow::add_recent_color(const QColor & color)
+{
+  int pos = color_position(color);
+
+  if (pos >= 0)
+    move_color_to_begin(pos);
+  else
+    recent_colors.push_front(color);
+
+  if (size_t(recent_colors.size()) > NUM_RECENT_COLORS)
+    recent_colors.pop_back();
+
+  for (size_t i = 1; i <= NUM_RECENT_COLORS; ++i)
+    {
+      if (i <= size_t(recent_colors.size()))
+        {
+          actions_pick_color[i]->setText(recent_colors[i - 1].name());
+          actions_pick_color[i]->setData(int(i - 1));
+          actions_pick_color[i]->setVisible(true);
+          QPixmap color_sample(15, 15);
+          color_sample.fill(recent_colors[i - 1]);
+          actions_pick_color[i]->setIcon(QIcon(color_sample));
+        }
+      else
+        actions_pick_color[i]->setVisible(false);
+    }
+}
+
+void MainWindow::move_color_to_begin(int p)
+{
+  QColor color = recent_colors[p];
+
+  for (int i = p; i > 0; --i)
+    recent_colors[i] = recent_colors[i - 1];
+
+  recent_colors[0] = color;
+}
+
 MainWindow::MainWindow(QWidget * parent)
   : QMainWindow(parent)
 {
@@ -380,39 +427,25 @@ void MainWindow::slot_export()
 
 void MainWindow::slot_set_color(QColor c)
 {
+  QColor last_color = drawing_panel->get_color_to_paint();
+
   drawing_panel->set_color_to_paint(c);
+
+  add_recent_color(last_color);
 
   QString msg = "Color changed to ";
   msg.append(c.name());
 
   statusBar()->showMessage(msg, STATUS_BAR_TIME);
-
-  recent_colors.push_front(c);
-
-  if (size_t(recent_colors.size()) > NUM_RECENT_COLORS)
-    recent_colors.pop_back();
-
-  for (size_t i = 1; i <= NUM_RECENT_COLORS; ++i)
-    {
-      if (i <= size_t(recent_colors.size()))
-        {
-          actions_pick_color[i]->setText(recent_colors[i - 1].name());
-          actions_pick_color[i]->setData(int(i - 1));
-          actions_pick_color[i]->setVisible(true);
-          QPixmap color_sample(15, 15);
-          color_sample.fill(recent_colors[i - 1]);
-          actions_pick_color[i]->setIcon(QIcon(color_sample));
-        }
-      else
-        actions_pick_color[i]->setVisible(false);
-    }
 }
 
 void MainWindow::slot_set_recent_color()
 {
   QAction * sndr = static_cast<QAction *>(sender());
   int color_index = sndr->data().toInt();
+  QColor last_color = drawing_panel->get_color_to_paint();
   drawing_panel->set_color_to_paint(recent_colors[color_index]);
+  add_recent_color(last_color);
 }
 
 void MainWindow::slot_pick_color()

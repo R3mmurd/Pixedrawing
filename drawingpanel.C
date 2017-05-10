@@ -156,6 +156,11 @@ const size_t & DrawingPanel::get_cols() const
   return cols;
 }
 
+const QColor &DrawingPanel::get_color_to_paint() const
+{
+  return color_to_paint;
+}
+
 void DrawingPanel::set_color_to_paint(const QColor & c)
 {
   color_to_paint = c;

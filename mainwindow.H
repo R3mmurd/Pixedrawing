@@ -95,6 +95,12 @@ class MainWindow : public QMainWindow
 
   void close_work();
 
+  int color_position(const QColor &) const;
+
+  void add_recent_color(const QColor &);
+
+  void move_color_to_begin(int);
+
 public:
   MainWindow(QWidget * parent = nullptr);
 
