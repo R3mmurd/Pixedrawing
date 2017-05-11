@@ -389,6 +389,7 @@ void MainWindow::slot_open()
     statusBar()->showMessage("Opening file...");
     drawing_panel->load_from_file(name);
     last_visited_path = QFileInfo(name).path();
+    is_saved = true;
     statusBar()->showMessage("File opened successfully", STATUS_BAR_TIME);
   }
   catch (const std::exception & e)

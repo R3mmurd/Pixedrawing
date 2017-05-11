@@ -47,4 +47,4 @@ FORMS += \
     customredimdialog.ui
 
 RESOURCES += \
-    images.qrc
+images.qrc

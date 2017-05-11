@@ -25,7 +25,6 @@
 
 # include <QPainter>
 # include <QMouseEvent>
-# include <QCryptographicHash>
 # include <QFile>
 
 void DrawingPanel::allocate_lattice()
@@ -156,7 +155,7 @@ const size_t & DrawingPanel::get_cols() const
   return cols;
 }
 
-const QColor &DrawingPanel::get_color_to_paint() const
+const QColor & DrawingPanel::get_color_to_paint() const
 {
   return color_to_paint;
 }
