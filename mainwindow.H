@@ -39,7 +39,7 @@ class MainWindow : public QMainWindow
 
   static const     char * EXT;
   static constexpr size_t NUM_DFT_REDIM_VALUES = 6;
-  static constexpr size_t NUM_RECENT_COLORS    = 5;
+  static constexpr size_t NUM_RECENT_COLORS    = 10;
   static constexpr int    STATUS_BAR_TIME      = 3000;
 
   QString last_visited_path;
