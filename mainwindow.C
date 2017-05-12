@@ -316,7 +316,7 @@ void MainWindow::redim(size_t rows, size_t cols)
                                 QMessageBox::Yes | QMessageBox::No) ==
           QMessageBox::No)
         {
-          statusBar()->showMessage("Resize not done!", 3000);
+          statusBar()->showMessage("Resize not done!", STATUS_BAR_TIME);
           update_actions_redim();
           return;
         }
@@ -325,7 +325,7 @@ void MainWindow::redim(size_t rows, size_t cols)
   drawing_panel->redim(rows, cols);
   is_saved = false;
 
-  statusBar()->showMessage("Panel resized successfully", 3000);
+  statusBar()->showMessage("Panel resized successfully", STATUS_BAR_TIME);
   update_actions_redim();
 }
 
