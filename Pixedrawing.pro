@@ -34,14 +34,16 @@ SOURCES += \
     mainwindow.C \
     customredimdialog.C \
     wheelfilter.C \
-    drawingpanelwrapper.C
+    drawingpanelwrapper.C \
+    helpers.C
 
 HEADERS += \
     drawingpanel.H \
     mainwindow.H \
     customredimdialog.H \
     wheelfilter.H \
-    drawingpanelwrapper.H
+    drawingpanelwrapper.H \
+    helpers.H
 
 FORMS += \
     customredimdialog.ui

@@ -27,32 +27,6 @@
 # include <QMouseEvent>
 # include <QFile>
 
-void DrawingPanel::allocate_lattice()
-{
-  lattice = new QColor*[rows];
-
-  for (size_t i = 0; i < rows; ++i)
-    {
-      lattice[i] = new QColor[cols];
-
-      for (size_t j = 0; j < cols; ++j)
-        lattice[i][j] = Qt::transparent;
-    }
-}
-
-void DrawingPanel::free_lattice()
-{
-  for (size_t i = 0; i < rows; ++i)
-    delete [] lattice[i];
-  delete [] lattice;
-}
-
-void DrawingPanel::redim()
-{
-  allocate_lattice();
-  resize(cols * SCALE * zoom_factor, rows * SCALE * zoom_factor);
-}
-
 void DrawingPanel::paintEvent(QPaintEvent *)
 {
   QPainter painter(this);
@@ -126,22 +100,30 @@ void DrawingPanel::mouseMoveEvent(QMouseEvent * evt)
 DrawingPanel::DrawingPanel(QWidget * parent)
   : QWidget(parent)
 {
-  allocate_lattice();
+  lattice = allocate_lattice(rows, cols);
   resize(cols * SCALE * zoom_factor, rows * SCALE * zoom_factor);
-  //setCursor(QCursor(Qt::));
 }
 
 DrawingPanel::~DrawingPanel()
 {
-  free_lattice();
+  free_lattice(lattice, rows);
 }
 
 void DrawingPanel::redim(size_t r, size_t c)
 {
-  free_lattice();
+  QColor ** tmp = allocate_lattice(r, c);
+
+  size_t _r = std::min(r, rows);
+  size_t _c = std::min(c, cols);
+
+  for (size_t i = 0; i < _r; ++i)
+    for (size_t j = 0; j < _c; ++j)
+      tmp[i][j] = lattice[i][j];
+
+  free_lattice(lattice, rows);
   rows = r;
   cols = c;
-  allocate_lattice();
+  lattice = tmp;
   resize(cols * SCALE * zoom_factor, rows * SCALE * zoom_factor);
 }
 
@@ -172,8 +154,8 @@ void DrawingPanel::save_to_file(QString & filename)
   if (not file.open(QIODevice::WriteOnly))
     throw std::runtime_error("Cannot create file");
 
-  file.write(reinterpret_cast<char *>(&rows), sizeof(rows));
-  file.write(reinterpret_cast<char *>(&cols), sizeof(cols));
+  file.write(reinterpret_cast<char *>(&rows), sizeof(size_t));
+  file.write(reinterpret_cast<char *>(&cols), sizeof(size_t));
 
   for (size_t i = 0; i < rows; ++i)
     for (size_t j = 0; j < cols; ++j)
@@ -198,12 +180,12 @@ void DrawingPanel::load_from_file(QString & filename)
   if (not file.open(QIODevice::ReadOnly))
     throw std::runtime_error("File doesn't exist");
 
-  free_lattice();
+  size_t r, c;
 
-  file.read(reinterpret_cast<char *>(&rows), sizeof(rows));
-  file.read(reinterpret_cast<char *>(&cols), sizeof(cols));
+  file.read(reinterpret_cast<char *>(&r), sizeof(size_t));
+  file.read(reinterpret_cast<char *>(&c), sizeof(size_t));
 
-  redim();
+  redim(r, c);
 
   for (size_t i = 0; i < rows; ++i)
     for (size_t j = 0; j < cols; ++j)
@@ -222,7 +204,7 @@ void DrawingPanel::load_from_file(QString & filename)
   file.close();
 }
 
-QImage DrawingPanel::to_image()
+QImage DrawingPanel::export_bitmap()
 {
   QImage ret_val(cols, rows, QImage::Format_ARGB32);
 

@@ -29,6 +29,8 @@
 # include <QFileDialog>
 # include <QStatusBar>
 
+# include <helpers.H>
+
 const char * MainWindow::EXT = "pxdr";
 
 void MainWindow::init_actions()
@@ -74,7 +76,7 @@ void MainWindow::init_actions()
               this, SLOT(slot_redim()));
       actions_redim[i]->setData(redim_value);
       actions_redim[i]->setCheckable(true);
-      if (redim_value == 64)
+      if (redim_value == DftValues::DRAWING_PANEL_SIZE)
         actions_redim[i]->setChecked(true);
       redim_value = redim_value << 1;
     }
@@ -126,7 +128,7 @@ void MainWindow::init_menu()
 
   menu_edit->addMenu(menu_color_list);
 
-  menu_redim = new QMenu("Redim", this);
+  menu_redim = new QMenu("Resize", this);
 
   for (unsigned i = 0; i < NUM_DFT_REDIM_VALUES; ++i)
     menu_redim->addAction(actions_redim[i]);
@@ -303,6 +305,42 @@ void MainWindow::move_color_to_begin(int p)
   recent_colors[0] = color;
 }
 
+void MainWindow::redim(size_t rows, size_t cols)
+{
+  if (rows < drawing_panel->get_rows() or cols < drawing_panel->get_cols())
+    {
+      QString msg = "You might lost some pixels\n";
+      msg.append("Do you want to continue?");
+
+      if (QMessageBox::question(this, "Warning", msg,
+                                QMessageBox::Yes | QMessageBox::No) ==
+          QMessageBox::No)
+        {
+          statusBar()->showMessage("Resize not done!", 3000);
+          update_actions_redim();
+          return;
+        }
+    }
+
+  drawing_panel->redim(rows, cols);
+  is_saved = false;
+
+  statusBar()->showMessage("Panel resized successfully", 3000);
+  update_actions_redim();
+}
+
+void MainWindow::update_actions_redim()
+{
+  for (size_t i = 0; i < NUM_DFT_REDIM_VALUES; ++i)
+    {
+      if (drawing_panel->get_rows() == drawing_panel->get_cols() and
+          actions_redim[i]->data().toUInt() == drawing_panel->get_rows())
+        actions_redim[i]->setChecked(true);
+      else
+        actions_redim[i]->setChecked(false);
+    }
+}
+
 MainWindow::MainWindow(QWidget * parent)
   : QMainWindow(parent)
 {
@@ -390,6 +428,7 @@ void MainWindow::slot_open()
     drawing_panel->load_from_file(name);
     last_visited_path = QFileInfo(name).path();
     is_saved = true;
+    update_actions_redim();
     statusBar()->showMessage("File opened successfully", STATUS_BAR_TIME);
   }
   catch (const std::exception & e)
@@ -421,7 +460,7 @@ void MainWindow::slot_export()
       filename.append(suffix);
     }
 
-  QImage img = drawing_panel->to_image();
+  QImage img = drawing_panel->export_bitmap();
   img.save(filename, suffix.toStdString().c_str());
   statusBar()->showMessage("Image exported successfully", STATUS_BAR_TIME);
 }
@@ -461,18 +500,8 @@ void MainWindow::slot_redim()
 {
   QAction * sndr = static_cast<QAction *>(sender());
 
-  if (not sndr->isChecked())
-    {
-      sndr->setChecked(true);
-      return;
-    }
-
-  for (size_t i = 0; i < NUM_DFT_REDIM_VALUES; ++i)
-    if (actions_redim[i] != sndr)
-      actions_redim[i]->setChecked(false);
-
   unsigned redim_value = sndr->data().toUInt();
-  drawing_panel->redim(redim_value, redim_value);
+  redim(redim_value, redim_value);
 }
 
 void MainWindow::slot_custom_redim()
@@ -487,17 +516,14 @@ void MainWindow::slot_custom_redim()
       custom_redim_dialog.ui.edt_rows->text().isEmpty())
     return;
 
-  drawing_panel->redim(custom_redim_dialog.ui.edt_cols->text().toULong(),
-                       custom_redim_dialog.ui.edt_rows->text().toULong());
-
-  for (size_t i = 0; i < NUM_DFT_REDIM_VALUES; ++i)
-    actions_redim[i]->setChecked(false);
+  redim(custom_redim_dialog.ui.edt_cols->text().toULong(),
+       custom_redim_dialog.ui.edt_rows->text().toULong());
 }
 
 void MainWindow::slot_update_zoom(double factor)
 {
-  action_zoom_in->setEnabled(factor <= 2.0);
-  action_zoom_out->setEnabled(factor >= 0.4);
+  action_zoom_in->setEnabled(factor <= DrawingPanelWrapper::MAX_ZOOM_FACTOR);
+  action_zoom_out->setEnabled(factor >= DrawingPanelWrapper::MIN_ZOOM_FACTOR);
 }
 
 void MainWindow::slot_about()

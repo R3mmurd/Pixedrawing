@@ -35,6 +35,11 @@ class DrawingPanelWrapper : public QWidget
 {
   Q_OBJECT
 
+public:
+  static constexpr double MAX_ZOOM_FACTOR = 4.0;
+  static constexpr double MIN_ZOOM_FACTOR = 0.4;
+
+private:
   DrawingPanel * drawing_panel;
   QScrollArea * scroll_area;
 

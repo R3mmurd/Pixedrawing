@@ -28,6 +28,8 @@
 # include <QColor>
 # include <QImage>
 
+# include <helpers.H>
+
 class DrawingPanel : public QWidget
 {
   Q_OBJECT
@@ -36,8 +38,8 @@ public:
   static constexpr size_t SCALE = 8;
 
 private:
-  size_t rows = 64;
-  size_t cols = 64;
+  size_t rows = DftValues::DRAWING_PANEL_SIZE;
+  size_t cols = DftValues::DRAWING_PANEL_SIZE;
 
   double zoom_factor = 1.0;
 
@@ -46,12 +48,6 @@ private:
   QColor color_to_paint = Qt::black;
 
   Qt::MouseButton pressed_button;
-
-  void allocate_lattice();
-
-  void free_lattice();
-
-  void redim();
 
 protected:
   void paintEvent(QPaintEvent *) override;
@@ -79,7 +75,7 @@ public:
 
   void load_from_file(QString &);
 
-  QImage to_image();
+  QImage export_bitmap();
 
   void zoom_in();
 

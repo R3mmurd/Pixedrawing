@@ -31,6 +31,7 @@ class CustomRedimDialog : public QDialog
 {
   Q_OBJECT
 
+  QIntValidator * validator;
 public:
   Ui_CustomRedimDialog ui;
 

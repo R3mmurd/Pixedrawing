@@ -27,7 +27,10 @@ CustomRedimDialog::CustomRedimDialog(QWidget * parent)
   : QDialog(parent)
 {
   ui.setupUi(this);
-  ui.edt_cols->setValidator(new QIntValidator);
-  ui.edt_rows->setValidator(new QIntValidator);
+
+  validator = new QIntValidator;
+  validator->setRange(0, 1024);
+  ui.edt_cols->setValidator(validator);
+  ui.edt_rows->setValidator(validator);
   ui.edt_rows->setFocus();
 }

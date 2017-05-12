@@ -84,9 +84,9 @@ void DrawingPanelWrapper::wheelEvent(QWheelEvent * evt)
 
   double factor = drawing_panel->get_zoom_factor();
 
-  if (evt->delta() > 0 and factor <= 2.0)
+  if (evt->delta() > 0 and factor <= MAX_ZOOM_FACTOR)
     slot_zoom_in();
-  else if (factor >= 0.4)
+  else if (factor >= MIN_ZOOM_FACTOR)
     slot_zoom_out();
 }
 

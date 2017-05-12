@@ -101,6 +101,10 @@ class MainWindow : public QMainWindow
 
   void move_color_to_begin(int);
 
+  void redim(size_t, size_t);
+
+  void update_actions_redim();
+
 public:
   MainWindow(QWidget * parent = nullptr);
 
