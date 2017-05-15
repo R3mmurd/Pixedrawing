@@ -27,6 +27,7 @@
 # include <QWidget>
 # include <QColor>
 # include <QImage>
+# include <QList>
 
 # include <helpers.H>
 
@@ -49,12 +50,16 @@ private:
 
   Qt::MouseButton pressed_button;
 
+  QList<std::tuple<QColor, size_t, size_t>> painted_cells;
+
 protected:
   void paintEvent(QPaintEvent *) override;
 
   void mousePressEvent(QMouseEvent *) override;
 
   void mouseMoveEvent(QMouseEvent *) override;
+
+  void mouseReleaseEvent(QMouseEvent *) override;
 
 public:
   DrawingPanel(QWidget * parent = nullptr);
@@ -85,8 +90,14 @@ public:
 
   const double & get_zoom_factor() const;
 
+  void paint(size_t, size_t, const QColor &);
+
+  const QColor & get_color(size_t, size_t) const;
+
 signals:
   void signal_changed();
+
+  void signal_painted(QList<std::tuple<QColor, size_t, size_t>>);
 };
 
 # endif // DRAWINGPANEL_H

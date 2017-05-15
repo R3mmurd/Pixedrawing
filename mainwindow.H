@@ -30,6 +30,7 @@
 # include <QAction>
 # include <QVector>
 
+# include <undocommands.H>
 # include <drawingpanelwrapper.H>
 # include <customredimdialog.H>
 
@@ -48,6 +49,8 @@ class MainWindow : public QMainWindow
   DrawingPanelWrapper * drawing_panel_wrapper;
   DrawingPanel * drawing_panel;
 
+  QUndoStack undo_stack;
+
   QAction * action_new;
   QAction * action_save;
   QAction * action_save_as;
@@ -55,6 +58,8 @@ class MainWindow : public QMainWindow
   QAction * action_export;
   QAction * action_exit;
 
+  QAction * action_undo;
+  QAction * action_redo;
   QAction * actions_redim[DftValues::NUM_DFT_REDIM_VALUES + 1];
   QAction * actions_pick_color[DftValues::NUM_RECENT_COLORS + 1];
 
@@ -133,6 +138,12 @@ public slots:
   void slot_about();
 
   void slot_about_qt();
+
+  void slot_painted(QList<std::tuple<QColor, size_t, size_t>>);
+
+  void slot_can_undo(bool);
+
+  void slot_can_redo(bool);
 };
 
 # endif // MAINWINDOW_H

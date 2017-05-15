@@ -35,7 +35,8 @@ SOURCES += \
     customredimdialog.C \
     wheelfilter.C \
     drawingpanelwrapper.C \
-    helpers.C
+    helpers.C \
+    undocommands.C
 
 HEADERS += \
     drawingpanel.H \
@@ -43,10 +44,11 @@ HEADERS += \
     customredimdialog.H \
     wheelfilter.H \
     drawingpanelwrapper.H \
-    helpers.H
+    helpers.H \
+    undocommands.H
 
 FORMS += \
     customredimdialog.ui
 
 RESOURCES += \
-images.qrc
+    images.qrc

@@ -8,5 +8,7 @@
         <file alias="zoom-1">images/zoom-original.png</file>
         <file alias="zoom-out">images/zoom-out.png</file>
         <file alias="app-icon">images/icon-64x64.png</file>
+        <file alias="redo">images/redo.png</file>
+        <file alias="undo">images/undo.png</file>
     </qresource>
 </RCC>

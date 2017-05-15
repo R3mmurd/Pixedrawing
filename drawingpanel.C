@@ -26,6 +26,7 @@
 # include <QPainter>
 # include <QMouseEvent>
 # include <QFile>
+# include <QDebug>
 
 void DrawingPanel::paintEvent(QPaintEvent *)
 {
@@ -35,6 +36,7 @@ void DrawingPanel::paintEvent(QPaintEvent *)
 
   double w = SCALE * zoom_factor;
   double h = SCALE * zoom_factor;
+
 
   for (size_t i = 0; i < rows; ++i)
     for (size_t j = 0; j < cols; ++j)
@@ -64,14 +66,22 @@ void DrawingPanel::mousePressEvent(QMouseEvent * evt)
   if (i >= rows or j >= cols)
     return;
 
+  QColor last_color = lattice[i][j];
+
   if (pressed_button == Qt::LeftButton)
-    lattice[i][j] = color_to_paint;
+    {
+      if (lattice[i][j] == color_to_paint)
+        return;
+      paint(i,j,color_to_paint);
+      painted_cells.append(std::make_tuple(last_color,i,j));
+    }
   else
-    lattice[i][j] = Qt::transparent;
-
-  emit signal_changed();
-
-  repaint();
+    {
+      if (lattice[i][j] == Qt::transparent)
+        return;
+      paint(i,j,Qt::transparent);
+      painted_cells.append(std::make_tuple(last_color,i,j));
+    }
 }
 
 void DrawingPanel::mouseMoveEvent(QMouseEvent * evt)
@@ -87,14 +97,32 @@ void DrawingPanel::mouseMoveEvent(QMouseEvent * evt)
   if (i >= rows or j >= cols)
     return;
 
+  QColor last_color = lattice[i][j];
+
   if (pressed_button == Qt::LeftButton)
-    lattice[i][j] = color_to_paint;
+    {
+      if (lattice[i][j] == color_to_paint)
+        return;
+      paint(i,j,color_to_paint);
+      painted_cells.append(std::make_tuple(last_color,i,j));
+    }
   else
-    lattice[i][j] = Qt::transparent;
+    {
+      if (lattice[i][j] == Qt::transparent)
+        return;
+      paint(i,j,Qt::transparent);
+      painted_cells.append(std::make_tuple(last_color,i,j));
+    }
+}
+
+void DrawingPanel::mouseReleaseEvent(QMouseEvent *)
+{
+  if (painted_cells.isEmpty())
+    return;
 
   emit signal_changed();
-
-  repaint();
+  emit signal_painted(painted_cells);
+  painted_cells.clear();
 }
 
 DrawingPanel::DrawingPanel(QWidget * parent)
@@ -239,4 +267,15 @@ void DrawingPanel::zoom_1()
 const double & DrawingPanel::get_zoom_factor() const
 {
   return zoom_factor;
+}
+
+void DrawingPanel::paint(size_t i, size_t j, const QColor & color)
+{
+  lattice[i][j] = color;
+  repaint();
+}
+
+const QColor & DrawingPanel::get_color(size_t i, size_t j) const
+{
+  return lattice[i][j];
 }

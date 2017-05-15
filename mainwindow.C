@@ -50,17 +50,21 @@ void MainWindow::init_actions()
   action_exit->setShortcut(tr("ctrl+q"));
   connect(action_exit, SIGNAL(triggered(bool)), this, SLOT(close()));
 
-  action_zoom_in = new QAction(QIcon(":icon/zoom-in"), "Zoom in", this);
-  action_zoom_in->setShortcut(tr("ctrl++"));
-  connect(action_zoom_in, SIGNAL(triggered(bool)),
-          drawing_panel_wrapper, SLOT(slot_zoom_in()));
-  action_zoom_out = new QAction(QIcon(":icon/zoom-out"), "Zoom out", this);
-  action_zoom_out->setShortcut(tr("ctrl+-"));
-  connect(action_zoom_out, SIGNAL(triggered(bool)),
-          drawing_panel_wrapper, SLOT(slot_zoom_out()));
-  action_zoom_1 = new QAction(QIcon(":icon/zoom-1"), "Original size", this);
-  connect(action_zoom_1, SIGNAL(triggered(bool)),
-          drawing_panel_wrapper, SLOT(slot_zoom_1()));
+  action_undo = new QAction(QIcon(":/icon/undo"), "&Undo", this);
+  action_undo->setShortcut(tr("ctrl+z"));
+  action_undo->setEnabled(false);
+  connect(action_undo, SIGNAL(triggered(bool)), &undo_stack, SLOT(undo()));
+
+  connect(&undo_stack, SIGNAL(canUndoChanged(bool)),
+          this, SLOT(slot_can_undo(bool)));
+
+  action_redo= new QAction(QIcon(":/icon/redo"), "&Redo", this);
+  action_redo->setShortcut(tr("ctrl+y"));
+  action_redo->setEnabled(false);
+  connect(action_redo, SIGNAL(triggered(bool)), &undo_stack, SLOT(redo()));
+
+  connect(&undo_stack, SIGNAL(canRedoChanged(bool)),
+          this, SLOT(slot_can_redo(bool)));
 
   unsigned redim_value = 8;
 
@@ -95,6 +99,18 @@ void MainWindow::init_actions()
               this, SLOT(slot_set_recent_color()));
     }
 
+  action_zoom_in = new QAction(QIcon(":icon/zoom-in"), "Zoom in", this);
+  action_zoom_in->setShortcut(tr("ctrl++"));
+  connect(action_zoom_in, SIGNAL(triggered(bool)),
+          drawing_panel_wrapper, SLOT(slot_zoom_in()));
+  action_zoom_out = new QAction(QIcon(":icon/zoom-out"), "Zoom out", this);
+  action_zoom_out->setShortcut(tr("ctrl+-"));
+  connect(action_zoom_out, SIGNAL(triggered(bool)),
+          drawing_panel_wrapper, SLOT(slot_zoom_out()));
+  action_zoom_1 = new QAction(QIcon(":icon/zoom-1"), "Original size", this);
+  connect(action_zoom_1, SIGNAL(triggered(bool)),
+          drawing_panel_wrapper, SLOT(slot_zoom_1()));
+
   action_about = new QAction("About", this);
   connect(action_about, SIGNAL(triggered(bool)), this, SLOT(slot_about()));
 
@@ -116,6 +132,9 @@ void MainWindow::init_menu()
   menuBar()->addMenu(menu_file);
 
   menu_edit = new QMenu("&Edit", this);
+
+  menu_edit->addAction(action_undo);
+  menu_edit->addAction(action_redo);
 
   menu_color_list = new QMenu("Select color", this);
   menu_color_list->addAction(actions_pick_color[0]);
@@ -156,6 +175,9 @@ void MainWindow::init_toolbar()
   tool_bar->addAction(action_save);
   tool_bar->addAction(action_open);
   tool_bar->addAction(action_exit);
+  tool_bar->addSeparator();
+  tool_bar->addAction(action_undo);
+  tool_bar->addAction(action_redo);
   tool_bar->addSeparator();
   tool_bar->addAction(action_zoom_in);
   tool_bar->addAction(action_zoom_out);
@@ -234,6 +256,9 @@ void MainWindow::create_work()
   connect(drawing_panel_wrapper, SIGNAL(signal_zoom(double)),
           this, SLOT(slot_update_zoom(double)));
   connect(drawing_panel, SIGNAL(signal_changed()), this, SLOT(slot_changed()));
+  connect(drawing_panel,
+          SIGNAL(signal_painted(QList<std::tuple<QColor, size_t, size_t>>)),
+          this, SLOT(slot_painted(QList<std::tuple<QColor, size_t, size_t>>)));
   setCentralWidget(drawing_panel_wrapper);
   set_title();
 }
@@ -254,6 +279,10 @@ void MainWindow::close_work()
              this, SLOT(slot_update_zoom(double)));
   disconnect(drawing_panel, SIGNAL(signal_changed()),
              this, SLOT(slot_changed()));
+  disconnect(drawing_panel,
+             SIGNAL(signal_painted(QList<std::tuple<QColor, size_t, size_t>>)),
+             this,
+             SLOT(slot_painted(QList<std::tuple<QColor, size_t, size_t>>)));
   drawing_panel_wrapper->close();
   delete drawing_panel_wrapper;
   drawing_panel = nullptr;
@@ -542,4 +571,19 @@ void MainWindow::slot_about()
 void MainWindow::slot_about_qt()
 {
   QMessageBox::aboutQt(this, "Acerca de Qt");
+}
+
+void MainWindow::slot_painted(QList<std::tuple<QColor, size_t, size_t>> l)
+{
+  undo_stack.push(new Paint(drawing_panel,l));
+}
+
+void MainWindow::slot_can_undo(bool value)
+{
+  action_undo->setEnabled(value);
+}
+
+void MainWindow::slot_can_redo(bool value)
+{
+  action_redo->setEnabled(value);
 }
