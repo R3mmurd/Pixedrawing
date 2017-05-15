@@ -24,14 +24,12 @@
 # ifndef DRAWINGPANELWRAPPER_H
 # define DRAWINGPANELWRAPPER_H
 
-# include <QWidget>
 # include <QScrollArea>
-# include <QVBoxLayout>
 
 # include <drawingpanel.H>
 # include <wheelfilter.H>
 
-class DrawingPanelWrapper : public QWidget
+class DrawingPanelWrapper : public QScrollArea
 {
   Q_OBJECT
 
@@ -41,10 +39,6 @@ public:
 
 private:
   DrawingPanel * drawing_panel;
-  QScrollArea * scroll_area;
-
-  QVBoxLayout * layout;
-
   WheelFilter * viewport_filter;
   WheelFilter * horizontal_bar_filter;
   WheelFilter * vertical_bar_filter;
@@ -52,8 +46,6 @@ private:
   void init_gui();
 
   void configure_filters();
-
-  void adjust_scroll_bar(QScrollBar *, double);
 
   void zoom();
 

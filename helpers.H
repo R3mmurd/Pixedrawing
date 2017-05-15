@@ -5,7 +5,11 @@
 
 struct DftValues
 {
-  static constexpr size_t DRAWING_PANEL_SIZE = 32;
+  static const     char * FILE_EXT;
+  static constexpr size_t NUM_DFT_REDIM_VALUES = 6;
+  static constexpr size_t NUM_RECENT_COLORS    = 10;
+  static constexpr int    STATUS_BAR_TIME      = 3000;
+  static constexpr size_t DRAWING_PANEL_SIZE   = 32;
 };
 
 QColor ** allocate_lattice(size_t, size_t);

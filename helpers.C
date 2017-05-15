@@ -1,5 +1,7 @@
 # include <helpers.H>
 
+const char * DftValues::FILE_EXT = "pxdr";
+
 QColor ** allocate_lattice(size_t rows, size_t cols)
 {
   QColor ** lattice = new QColor*[rows];

@@ -31,8 +31,6 @@
 
 # include <helpers.H>
 
-const char * MainWindow::EXT = "pxdr";
-
 void MainWindow::init_actions()
 {
   action_new = new QAction(QIcon(":icon/new"), "&New", this);
@@ -66,7 +64,7 @@ void MainWindow::init_actions()
 
   unsigned redim_value = 8;
 
-  for (size_t i = 0; i < NUM_DFT_REDIM_VALUES; ++i)
+  for (size_t i = 0; i < DftValues::NUM_DFT_REDIM_VALUES; ++i)
     {
       QString action_text = QString::asprintf("%u x %u",
                                               redim_value, redim_value);
@@ -81,15 +79,15 @@ void MainWindow::init_actions()
       redim_value = redim_value << 1;
     }
 
-  actions_redim[NUM_DFT_REDIM_VALUES] = new QAction("Custom", this);
-  connect(actions_redim[NUM_DFT_REDIM_VALUES], SIGNAL(triggered(bool)),
-          this, SLOT(slot_custom_redim()));
+  actions_redim[DftValues::NUM_DFT_REDIM_VALUES] = new QAction("Custom", this);
+  connect(actions_redim[DftValues::NUM_DFT_REDIM_VALUES],
+      SIGNAL(triggered(bool)), this, SLOT(slot_custom_redim()));
 
   actions_pick_color[0] = new QAction("Pick color", this);
   connect(actions_pick_color[0], SIGNAL(triggered(bool)),
           this, SLOT(slot_pick_color()));
 
-  for (size_t i = 1; i <= NUM_RECENT_COLORS; ++i)
+  for (size_t i = 1; i <= DftValues::NUM_RECENT_COLORS; ++i)
     {
       actions_pick_color[i] = new QAction(this);
       actions_pick_color[i]->setVisible(false);
@@ -123,17 +121,17 @@ void MainWindow::init_menu()
   menu_color_list->addAction(actions_pick_color[0]);
   menu_color_list->addSeparator();
 
-  for (size_t i = 1; i <= NUM_RECENT_COLORS; ++i)
+  for (size_t i = 1; i <= DftValues::NUM_RECENT_COLORS; ++i)
     menu_color_list->addAction(actions_pick_color[i]);
 
   menu_edit->addMenu(menu_color_list);
 
   menu_redim = new QMenu("Resize", this);
 
-  for (unsigned i = 0; i < NUM_DFT_REDIM_VALUES; ++i)
+  for (unsigned i = 0; i < DftValues::NUM_DFT_REDIM_VALUES; ++i)
     menu_redim->addAction(actions_redim[i]);
 
-  menu_redim->addAction(actions_redim[NUM_DFT_REDIM_VALUES]);
+  menu_redim->addAction(actions_redim[DftValues::NUM_DFT_REDIM_VALUES]);
 
   menu_edit->addMenu(menu_redim);
   menuBar()->addMenu(menu_edit);
@@ -178,7 +176,8 @@ void MainWindow::init_gui()
   resize(800, 600);
   setWindowIcon(QIcon(":icon/app-icon"));
 
-  statusBar()->showMessage("GUI created successfully", STATUS_BAR_TIME);
+  statusBar()->showMessage("GUI created successfully",
+                           DftValues::STATUS_BAR_TIME);
 }
 
 void MainWindow::save_file()
@@ -188,12 +187,14 @@ void MainWindow::save_file()
     statusBar()->showMessage("Saving file...");
     drawing_panel->save_to_file(name);
     is_saved = true;
-    statusBar()->showMessage("File saved successfully", STATUS_BAR_TIME);
+    statusBar()->showMessage("File saved successfully",
+                             DftValues::STATUS_BAR_TIME);
   }
   catch(const std::exception & e)
   {
     QMessageBox::critical(this, "Error saving file", e.what());
-    statusBar()->showMessage("Error saving file", STATUS_BAR_TIME);
+    statusBar()->showMessage("Error saving file",
+                             DftValues::STATUS_BAR_TIME);
   }
 }
 
@@ -276,10 +277,10 @@ void MainWindow::add_recent_color(const QColor & color)
   else
     recent_colors.push_front(color);
 
-  if (size_t(recent_colors.size()) > NUM_RECENT_COLORS)
+  if (size_t(recent_colors.size()) > DftValues::NUM_RECENT_COLORS)
     recent_colors.pop_back();
 
-  for (size_t i = 1; i <= NUM_RECENT_COLORS; ++i)
+  for (size_t i = 1; i <= DftValues::NUM_RECENT_COLORS; ++i)
     {
       if (i <= size_t(recent_colors.size()))
         {
@@ -316,7 +317,8 @@ void MainWindow::redim(size_t rows, size_t cols)
                                 QMessageBox::Yes | QMessageBox::No) ==
           QMessageBox::No)
         {
-          statusBar()->showMessage("Resize not done!", STATUS_BAR_TIME);
+          statusBar()->showMessage("Resize not done!",
+                                   DftValues::STATUS_BAR_TIME);
           update_actions_redim();
           return;
         }
@@ -325,13 +327,14 @@ void MainWindow::redim(size_t rows, size_t cols)
   drawing_panel->redim(rows, cols);
   is_saved = false;
 
-  statusBar()->showMessage("Panel resized successfully", STATUS_BAR_TIME);
+  statusBar()->showMessage("Panel resized successfully",
+                           DftValues::STATUS_BAR_TIME);
   update_actions_redim();
 }
 
 void MainWindow::update_actions_redim()
 {
-  for (size_t i = 0; i < NUM_DFT_REDIM_VALUES; ++i)
+  for (size_t i = 0; i < DftValues::NUM_DFT_REDIM_VALUES; ++i)
     {
       if (drawing_panel->get_rows() == drawing_panel->get_cols() and
           actions_redim[i]->data().toUInt() == drawing_panel->get_rows())
@@ -380,24 +383,24 @@ void MainWindow::slot_save()
 void MainWindow::slot_save_as()
 {
   QString ext = "*.";
-  ext.append(EXT);
+  ext.append(DftValues::FILE_EXT);
 
   QString filename = QFileDialog::getSaveFileName(this, "Save file as",
                                       last_visited_path, ext);
 
   if (filename.isEmpty())
     {
-      statusBar()->showMessage("File not saved", STATUS_BAR_TIME);
+      statusBar()->showMessage("File not saved", DftValues::STATUS_BAR_TIME);
       return;
     }
 
   name = filename;
   QFileInfo file_info(name);
 
-  if (file_info.suffix() != EXT)
+  if (file_info.suffix() != DftValues::FILE_EXT)
     {
       name.append(".");
-      name.append(EXT);
+      name.append(DftValues::FILE_EXT);
     }
 
   save_file();
@@ -409,13 +412,14 @@ void MainWindow::slot_save_as()
 void MainWindow::slot_open()
 {
   QString ext = "*.";
-  ext.append(EXT);
+  ext.append(DftValues::FILE_EXT);
 
   QString filename = QFileDialog::getOpenFileName(this, "Open file",
                                       last_visited_path, ext);
   if (filename.isEmpty())
     {
-      statusBar()->showMessage("File not opened", STATUS_BAR_TIME);
+      statusBar()->showMessage("File not opened",
+                               DftValues::STATUS_BAR_TIME);
       return;
     }
 
@@ -429,12 +433,14 @@ void MainWindow::slot_open()
     last_visited_path = QFileInfo(name).path();
     is_saved = true;
     update_actions_redim();
-    statusBar()->showMessage("File opened successfully", STATUS_BAR_TIME);
+    statusBar()->showMessage("File opened successfully",
+                             DftValues::STATUS_BAR_TIME);
   }
   catch (const std::exception & e)
   {
     QMessageBox::critical(this, "Error opening file", e.what());
-    statusBar()->showMessage("Error opening file", STATUS_BAR_TIME);
+    statusBar()->showMessage("Error opening file",
+                             DftValues::STATUS_BAR_TIME);
   }
 }
 
@@ -446,7 +452,8 @@ void MainWindow::slot_export()
 
   if (filename.isEmpty())
     {
-      statusBar()->showMessage("Image not exported", STATUS_BAR_TIME);
+      statusBar()->showMessage("Image not exported",
+                               DftValues::STATUS_BAR_TIME);
       return;
     }
 
@@ -462,7 +469,8 @@ void MainWindow::slot_export()
 
   QImage img = drawing_panel->export_bitmap();
   img.save(filename, suffix.toStdString().c_str());
-  statusBar()->showMessage("Image exported successfully", STATUS_BAR_TIME);
+  statusBar()->showMessage("Image exported successfully",
+                           DftValues::STATUS_BAR_TIME);
 }
 
 void MainWindow::slot_set_color(QColor c)
@@ -476,7 +484,7 @@ void MainWindow::slot_set_color(QColor c)
   QString msg = "Color changed to ";
   msg.append(c.name());
 
-  statusBar()->showMessage(msg, STATUS_BAR_TIME);
+  statusBar()->showMessage(msg, DftValues::STATUS_BAR_TIME);
 }
 
 void MainWindow::slot_set_recent_color()

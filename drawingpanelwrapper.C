@@ -30,48 +30,35 @@ void DrawingPanelWrapper::init_gui()
 {
   drawing_panel = new DrawingPanel(this);
 
-  scroll_area = new QScrollArea(this);
-  scroll_area->setBackgroundRole(QPalette::Dark);
-  scroll_area->setAlignment(Qt::AlignCenter);
-  scroll_area->setWidget(drawing_panel);
-
-  layout = new QVBoxLayout(this);
-  layout->addWidget(scroll_area);
-  setLayout(layout);
+  viewport()->setBackgroundRole(QPalette::Dark);
+  viewport()->setAutoFillBackground(true);
+  setAlignment(Qt::AlignCenter);
+  setWidget(drawing_panel);
 }
 
 void DrawingPanelWrapper::configure_filters()
 {
-  viewport_filter = new WheelFilter(scroll_area->viewport(), this);
-  horizontal_bar_filter = new WheelFilter(scroll_area->horizontalScrollBar(),
+  viewport_filter = new WheelFilter(viewport(), this);
+  horizontal_bar_filter = new WheelFilter(horizontalScrollBar(),
                                           this);
-  vertical_bar_filter = new WheelFilter(scroll_area->verticalScrollBar(), this);
+  vertical_bar_filter = new WheelFilter(verticalScrollBar(), this);
 
-  scroll_area->viewport()->installEventFilter(viewport_filter);
-  scroll_area->horizontalScrollBar()->
+  viewport()->installEventFilter(viewport_filter);
+  horizontalScrollBar()->
       installEventFilter(horizontal_bar_filter);
-  scroll_area->verticalScrollBar()->installEventFilter(vertical_bar_filter);
+  verticalScrollBar()->installEventFilter(vertical_bar_filter);
 
   installEventFilter(this);
-}
-
-void DrawingPanelWrapper::adjust_scroll_bar(QScrollBar * scroll_bar,
-                                            double factor)
-{
-  scroll_bar->setValue(int(factor * scroll_bar->value() +
-                           ((factor - 1) * scroll_bar->pageStep() / 2)));
 }
 
 void DrawingPanelWrapper::zoom()
 {
   double factor = drawing_panel->get_zoom_factor();
   emit signal_zoom(factor);
-  adjust_scroll_bar(scroll_area->horizontalScrollBar(), factor);
-  adjust_scroll_bar(scroll_area->verticalScrollBar(), factor);
 }
 
 DrawingPanelWrapper::DrawingPanelWrapper(QWidget * parent)
-  : QWidget(parent)
+  : QScrollArea(parent)
 {
   init_gui();
   configure_filters();

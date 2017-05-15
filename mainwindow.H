@@ -37,11 +37,6 @@ class MainWindow : public QMainWindow
 {
   Q_OBJECT
 
-  static const     char * EXT;
-  static constexpr size_t NUM_DFT_REDIM_VALUES = 6;
-  static constexpr size_t NUM_RECENT_COLORS    = 10;
-  static constexpr int    STATUS_BAR_TIME      = 3000;
-
   QString last_visited_path;
 
   bool is_saved = true;
@@ -60,8 +55,8 @@ class MainWindow : public QMainWindow
   QAction * action_export;
   QAction * action_exit;
 
-  QAction * actions_redim[NUM_DFT_REDIM_VALUES + 1];
-  QAction * actions_pick_color[NUM_RECENT_COLORS + 1];
+  QAction * actions_redim[DftValues::NUM_DFT_REDIM_VALUES + 1];
+  QAction * actions_pick_color[DftValues::NUM_RECENT_COLORS + 1];
 
   QAction * action_zoom_in;
   QAction * action_zoom_out;
