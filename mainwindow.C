@@ -99,6 +99,11 @@ void MainWindow::init_actions()
               this, SLOT(slot_set_recent_color()));
     }
 
+  action_show_dock_layers = new QAction("Layers", this);
+  action_show_dock_layers->setCheckable(true);
+  action_show_dock_layers->setChecked(true);
+  connect(action_show_dock_layers, SIGNAL(triggered(bool)),
+          this, SLOT(slot_show_dock_layers()));
   action_zoom_in = new QAction(QIcon(":icon/zoom-in"), "Zoom in", this);
   action_zoom_in->setShortcut(tr("ctrl++"));
   connect(action_zoom_in, SIGNAL(triggered(bool)),
@@ -110,6 +115,13 @@ void MainWindow::init_actions()
   action_zoom_1 = new QAction(QIcon(":icon/zoom-1"), "Original size", this);
   connect(action_zoom_1, SIGNAL(triggered(bool)),
           drawing_panel_wrapper, SLOT(slot_zoom_1()));
+
+  action_new_layer = new QAction("New layer", this);
+  connect(action_new_layer, SIGNAL(triggered(bool)),
+          this, SLOT(slot_new_layer()));
+  action_remove_layer = new QAction("Remove layer", this);
+  connect(action_remove_layer, SIGNAL(triggered(bool)),
+          this, SLOT(slot_remove_layer()));
 
   action_about = new QAction("About", this);
   connect(action_about, SIGNAL(triggered(bool)), this, SLOT(slot_about()));
@@ -156,10 +168,20 @@ void MainWindow::init_menu()
   menuBar()->addMenu(menu_edit);
 
   menu_view = new QMenu("&View", this);
+
+  menu_dock = new QMenu("Dock widgets", this);
+  menu_dock->addAction(action_show_dock_layers);
+  menu_view->addMenu(menu_dock);
+
   menu_view->addAction(action_zoom_in);
   menu_view->addAction(action_zoom_out);
   menu_view->addAction(action_zoom_1);
   menuBar()->addMenu(menu_view);
+
+  menu_layer = new QMenu("&Layer", this);
+  menu_layer->addAction(action_new_layer);
+  menu_layer->addAction(action_remove_layer);
+  menuBar()->addMenu(menu_layer);
 
   menu_help = new QMenu("&Help", this);
   menu_help->addAction(action_about);
@@ -186,7 +208,19 @@ void MainWindow::init_toolbar()
 
 void MainWindow::init_gui()
 {
+  dock_layers = new DockLayers(this);
+  addDockWidget(Qt::RightDockWidgetArea, dock_layers);
+  connect(dock_layers, SIGNAL(signal_close()),
+          this, SLOT(slot_close_dock_layers()));
+  connect(dock_layers, SIGNAL(signal_change_name(QString,int)),
+          this, SLOT(slot_change_layer_name(QString,int)));
+  connect(dock_layers, SIGNAL(signal_change_visibility(bool,int)),
+          this, SLOT(slot_change_layer_visibility(bool,int)));
+  connect(dock_layers, SIGNAL(signal_change_selected_layer(int)),
+          this, SLOT(slot_change_selected_layer(int)));
+
   create_work();
+  dock_layers->add_layer_info(drawing_panel->get_layer_info());
   statusBar()->showMessage("Creating actions...");
   init_actions();
   statusBar()->showMessage("Creating menus...");
@@ -257,8 +291,10 @@ void MainWindow::create_work()
           this, SLOT(slot_update_zoom(double)));
   connect(drawing_panel, SIGNAL(signal_changed()), this, SLOT(slot_changed()));
   connect(drawing_panel,
-          SIGNAL(signal_painted(QList<std::tuple<QColor, size_t, size_t>>)),
-          this, SLOT(slot_painted(QList<std::tuple<QColor, size_t, size_t>>)));
+          SIGNAL(signal_painted(QList<std::tuple<QColor, size_t, size_t,
+                                size_t>>)),
+          this, SLOT(slot_painted(QList<std::tuple<QColor, size_t, size_t,
+                                  size_t>>)));
   setCentralWidget(drawing_panel_wrapper);
   set_title();
 }
@@ -280,9 +316,12 @@ void MainWindow::close_work()
   disconnect(drawing_panel, SIGNAL(signal_changed()),
              this, SLOT(slot_changed()));
   disconnect(drawing_panel,
-             SIGNAL(signal_painted(QList<std::tuple<QColor, size_t, size_t>>)),
+             SIGNAL(signal_painted(QList<std::tuple<QColor, size_t, size_t,
+                                   size_t>>)),
              this,
-             SLOT(slot_painted(QList<std::tuple<QColor, size_t, size_t>>)));
+             SLOT(slot_painted(QList<std::tuple<QColor, size_t, size_t,
+                               size_t>>)));
+  dock_layers->clear();
   drawing_panel_wrapper->close();
   delete drawing_panel_wrapper;
   drawing_panel = nullptr;
@@ -396,6 +435,7 @@ void MainWindow::slot_new()
 {
   close_work();
   create_work();
+  dock_layers->add_layer_info(drawing_panel->get_layer_info());
 }
 
 void MainWindow::slot_save()
@@ -453,7 +493,8 @@ void MainWindow::slot_open()
     }
 
   name = filename;
-  slot_new();
+  close_work();
+  create_work();
 
   try
   {
@@ -471,6 +512,8 @@ void MainWindow::slot_open()
     statusBar()->showMessage("Error opening file",
                              DftValues::STATUS_BAR_TIME);
   }
+
+  dock_layers->add_layer_info(drawing_panel->get_layer_info());
 }
 
 void MainWindow::slot_export()
@@ -554,13 +597,48 @@ void MainWindow::slot_custom_redim()
     return;
 
   redim(custom_redim_dialog.ui.edt_cols->text().toULong(),
-       custom_redim_dialog.ui.edt_rows->text().toULong());
+        custom_redim_dialog.ui.edt_rows->text().toULong());
+}
+
+void MainWindow::slot_show_dock_layers()
+{
+  if (action_show_dock_layers->isChecked())
+    dock_layers->show();
+  else
+    dock_layers->hide();
+}
+
+void MainWindow::slot_close_dock_layers()
+{
+  dock_layers->hide();
+  action_show_dock_layers->setChecked(false);
 }
 
 void MainWindow::slot_update_zoom(double factor)
 {
   action_zoom_in->setEnabled(factor <= DrawingPanelWrapper::MAX_ZOOM_FACTOR);
   action_zoom_out->setEnabled(factor >= DrawingPanelWrapper::MIN_ZOOM_FACTOR);
+}
+
+void MainWindow::slot_new_layer()
+{
+  drawing_panel->get_lattice().add_layer_front();
+  dock_layers->add_layer_info(drawing_panel->get_layer_info(0));
+  is_saved = true;
+  action_remove_layer->setEnabled(true);
+  drawing_panel->repaint();
+}
+
+void MainWindow::slot_remove_layer()
+{
+  int l = drawing_panel->get_current_layer();
+  drawing_panel->get_lattice().remove_layer(l);
+  dock_layers->remove_layer_info(l);
+
+  drawing_panel->repaint();
+
+  if (drawing_panel->get_lattice().get_num_layers() == 0)
+    action_remove_layer->setEnabled(false);
 }
 
 void MainWindow::slot_about()
@@ -573,9 +651,10 @@ void MainWindow::slot_about_qt()
   QMessageBox::aboutQt(this, "Acerca de Qt");
 }
 
-void MainWindow::slot_painted(QList<std::tuple<QColor, size_t, size_t>> l)
+void MainWindow::slot_painted(
+    QList<std::tuple<QColor, size_t, size_t, size_t>> l)
 {
-  undo_stack.push(new Paint(drawing_panel,l));
+  undo_stack.push(new Paint(drawing_panel, l));
 }
 
 void MainWindow::slot_can_undo(bool value)
@@ -586,4 +665,31 @@ void MainWindow::slot_can_undo(bool value)
 void MainWindow::slot_can_redo(bool value)
 {
   action_redo->setEnabled(value);
+}
+
+void MainWindow::slot_change_layer_visibility(bool value, int l)
+{
+  if (drawing_panel->get_lattice().is_layer_visible(l) == value)
+    return;
+
+  if (value)
+    drawing_panel->get_lattice().show_layer(l);
+  else
+    drawing_panel->get_lattice().hide_layer(l);
+
+  is_saved = false;
+}
+
+void MainWindow::slot_change_layer_name(QString name, int l)
+{
+  if (drawing_panel->get_lattice().get_layer_name(l) == name)
+    return;
+
+  drawing_panel->get_lattice().set_layer_name(l, name);
+  is_saved = false;
+}
+
+void MainWindow::slot_change_selected_layer(int l)
+{
+  drawing_panel->set_current_layer(l);
 }

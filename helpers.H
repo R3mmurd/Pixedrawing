@@ -12,7 +12,8 @@ struct DftValues
   static constexpr size_t DRAWING_PANEL_SIZE   = 32;
 };
 
-QColor ** allocate_lattice(size_t, size_t);
+QColor ** allocate_lattice(size_t, size_t,
+                           const QColor & dft_color = Qt::transparent);
 
 void free_lattice(QColor **, size_t);
 

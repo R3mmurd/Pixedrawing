@@ -36,7 +36,9 @@ SOURCES += \
     wheelfilter.C \
     drawingpanelwrapper.C \
     helpers.C \
-    undocommands.C
+    undocommands.C \
+    drawinglattice.C \
+    docklayers.C
 
 HEADERS += \
     drawingpanel.H \
@@ -45,7 +47,9 @@ HEADERS += \
     wheelfilter.H \
     drawingpanelwrapper.H \
     helpers.H \
-    undocommands.H
+    undocommands.H \
+    drawinglattice.H \
+    docklayers.H
 
 FORMS += \
     customredimdialog.ui

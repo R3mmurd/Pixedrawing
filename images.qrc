@@ -10,5 +10,7 @@
         <file alias="app-icon">images/icon-64x64.png</file>
         <file alias="redo">images/redo.png</file>
         <file alias="undo">images/undo.png</file>
+        <file alias="eye">images/eye.png</file>
+        <file alias="xeye">images/xeye.png</file>
     </qresource>
 </RCC>

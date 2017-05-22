@@ -10,12 +10,25 @@ class DrawingPanel;
 class Paint : public QUndoCommand
 {
   DrawingPanel * panel;
-  QList<std::tuple<QColor, size_t, size_t>> painted_cells;
+  QList<std::tuple<QColor, size_t,size_t, size_t>> painted_cells;
 
   bool has_undo = false;
 
 public:
-  Paint(DrawingPanel *, const QList<std::tuple<QColor, size_t, size_t>> &);
+  Paint(DrawingPanel *,
+        const QList<std::tuple<QColor, size_t, size_t, size_t>> &);
+
+  void undo() override;
+
+  void redo() override;
+};
+
+// TODO
+class Resize : public QUndoCommand
+{
+
+public:
+  Resize();
 
   void undo() override;
 

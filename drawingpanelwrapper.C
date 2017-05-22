@@ -28,7 +28,8 @@
 
 void DrawingPanelWrapper::init_gui()
 {
-  drawing_panel = new DrawingPanel(this);
+  drawing_panel = new DrawingPanel(DftValues::DRAWING_PANEL_SIZE,
+                                   DftValues::DRAWING_PANEL_SIZE,this);
 
   viewport()->setBackgroundRole(QPalette::Dark);
   viewport()->setAutoFillBackground(true);

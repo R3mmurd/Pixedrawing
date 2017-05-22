@@ -33,6 +33,7 @@
 # include <undocommands.H>
 # include <drawingpanelwrapper.H>
 # include <customredimdialog.H>
+# include <docklayers.H>
 
 class MainWindow : public QMainWindow
 {
@@ -48,6 +49,7 @@ class MainWindow : public QMainWindow
 
   DrawingPanelWrapper * drawing_panel_wrapper;
   DrawingPanel * drawing_panel;
+  DockLayers * dock_layers;
 
   QUndoStack undo_stack;
 
@@ -63,9 +65,13 @@ class MainWindow : public QMainWindow
   QAction * actions_redim[DftValues::NUM_DFT_REDIM_VALUES + 1];
   QAction * actions_pick_color[DftValues::NUM_RECENT_COLORS + 1];
 
+  QAction * action_show_dock_layers;
   QAction * action_zoom_in;
   QAction * action_zoom_out;
   QAction * action_zoom_1;
+
+  QAction * action_new_layer;
+  QAction * action_remove_layer;
 
   QAction * action_about;
   QAction * action_about_qt;
@@ -75,6 +81,8 @@ class MainWindow : public QMainWindow
   QMenu * menu_color_list;
   QMenu * menu_redim;
   QMenu * menu_view;
+  QMenu * menu_dock;
+  QMenu * menu_layer;
   QMenu * menu_help;
 
   QToolBar * tool_bar;
@@ -133,17 +141,31 @@ public slots:
 
   void slot_custom_redim();
 
+  void slot_show_dock_layers();
+
+  void slot_close_dock_layers();
+
   void slot_update_zoom(double);
+
+  void slot_new_layer();
+
+  void slot_remove_layer();
 
   void slot_about();
 
   void slot_about_qt();
 
-  void slot_painted(QList<std::tuple<QColor, size_t, size_t>>);
+  void slot_painted(QList<std::tuple<QColor, size_t, size_t, size_t>>);
 
   void slot_can_undo(bool);
 
   void slot_can_redo(bool);
+
+  void slot_change_layer_visibility(bool, int);
+
+  void slot_change_layer_name(QString, int);
+
+  void slot_change_selected_layer(int);
 };
 
 # endif // MAINWINDOW_H

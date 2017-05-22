@@ -2,7 +2,7 @@
 
 const char * DftValues::FILE_EXT = "pxdr";
 
-QColor ** allocate_lattice(size_t rows, size_t cols)
+QColor ** allocate_lattice(size_t rows, size_t cols, const QColor & dft_color)
 {
   QColor ** lattice = new QColor*[rows];
 
@@ -11,7 +11,7 @@ QColor ** allocate_lattice(size_t rows, size_t cols)
       lattice[i] = new QColor[cols];
 
       for (size_t j = 0; j < cols; ++j)
-        lattice[i][j] = Qt::transparent;
+        lattice[i][j] = dft_color;
     }
 
   return lattice;

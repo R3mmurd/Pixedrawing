@@ -25,11 +25,9 @@
 # define DRAWINGPANEL_H
 
 # include <QWidget>
-# include <QColor>
-# include <QImage>
 # include <QList>
 
-# include <helpers.H>
+# include <drawinglattice.H>
 
 class DrawingPanel : public QWidget
 {
@@ -39,18 +37,19 @@ public:
   static constexpr size_t SCALE = 8;
 
 private:
-  size_t rows = DftValues::DRAWING_PANEL_SIZE;
-  size_t cols = DftValues::DRAWING_PANEL_SIZE;
+  DrawingLattice lattice;
 
   double zoom_factor = 1.0;
 
-  QColor ** lattice = nullptr;
+  DrawingLattice::LayerSet::size_type current_layer = 0;
 
   QColor color_to_paint = Qt::black;
 
   Qt::MouseButton pressed_button;
 
-  QList<std::tuple<QColor, size_t, size_t>> painted_cells;
+  QList<std::tuple<QColor, size_t, size_t, size_t>> painted_cells;
+
+  void adjust_size();
 
 protected:
   void paintEvent(QPaintEvent *) override;
@@ -62,25 +61,11 @@ protected:
   void mouseReleaseEvent(QMouseEvent *) override;
 
 public:
-  DrawingPanel(QWidget * parent = nullptr);
-
-  ~DrawingPanel();
-
-  void redim(size_t, size_t);
-
-  const size_t & get_rows() const;
-
-  const size_t & get_cols() const;
+  DrawingPanel(size_t, size_t, QWidget * parent = nullptr);
 
   const QColor & get_color_to_paint() const;
 
   void set_color_to_paint(const QColor &);
-
-  void save_to_file(QString &);
-
-  void load_from_file(QString &);
-
-  QImage export_bitmap();
 
   void zoom_in();
 
@@ -90,14 +75,36 @@ public:
 
   const double & get_zoom_factor() const;
 
-  void paint(size_t, size_t, const QColor &);
+  void save_to_file(QString &);
 
-  const QColor & get_color(size_t, size_t) const;
+  void load_from_file(QString &);
+
+  QImage export_bitmap();
+
+  const size_t & get_rows() const;
+
+  const size_t & get_cols() const;
+
+  void redim(size_t, size_t);
+
+  DrawingLattice & get_lattice();
+
+  void set_current_layer(DrawingLattice::LayerSet::size_type);
+
+  const DrawingLattice::LayerSet::size_type & get_current_layer() const;
+
+  std::tuple<QString, bool>
+  get_layer_info(DrawingLattice::LayerSet::size_type) const;
+
+  QList<std::tuple<QString, bool>> get_layer_info() const;
 
 signals:
   void signal_changed();
 
-  void signal_painted(QList<std::tuple<QColor, size_t, size_t>>);
+  void signal_painted(QList<std::tuple<QColor, size_t, size_t, size_t>>);
+
+public slots:
+  void slot_change_visibility(bool);
 };
 
 # endif // DRAWINGPANEL_H
