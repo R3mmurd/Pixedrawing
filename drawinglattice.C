@@ -26,6 +26,8 @@
 # include <QPainter>
 # include <QFile>
 
+# include <QDebug>
+
 DrawingLattice::DrawingLattice(size_t r, size_t c)
   : rows(r), cols(c)
 {
@@ -133,6 +135,8 @@ void DrawingLattice::load_from_file(QString & filename)
   file.read(reinterpret_cast<char *>(&rows), sizeof(size_t));
   file.read(reinterpret_cast<char *>(&cols), sizeof(size_t));
 
+  qDebug() << num_layers << rows << cols;
+
   for (LayerSet::size_type l = 0; l < num_layers; ++l)
     {
       Layer layer;
@@ -146,6 +150,8 @@ void DrawingLattice::load_from_file(QString & filename)
 
       layer.mat = allocate_lattice(rows, cols);
 
+      qDebug() << layer.name << layer.visible;
+
       for (size_t i = 0; i < rows; ++i)
         for (size_t j = 0; j < cols; ++j)
           {
@@ -158,6 +164,9 @@ void DrawingLattice::load_from_file(QString & filename)
             layer.mat[i][j].setBlue(c);
             file.read(reinterpret_cast<char *>(&c), sizeof(int));
             layer.mat[i][j].setAlpha(c);
+
+            qDebug() << layer.mat[i][j].red() << layer.mat[i][j].green()
+                     << layer.mat[i][j].blue() << layer.mat[i][j].alpha();
           }
 
         layers.push_back(layer);

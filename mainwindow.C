@@ -624,9 +624,9 @@ void MainWindow::slot_new_layer()
 {
   drawing_panel->get_lattice().add_layer_front();
   dock_layers->add_layer_info(drawing_panel->get_layer_info(0));
-  is_saved = true;
   action_remove_layer->setEnabled(true);
   drawing_panel->repaint();
+  is_saved = false;
 }
 
 void MainWindow::slot_remove_layer()
@@ -639,6 +639,8 @@ void MainWindow::slot_remove_layer()
 
   if (drawing_panel->get_lattice().get_num_layers() == 0)
     action_remove_layer->setEnabled(false);
+
+  is_saved = false;
 }
 
 void MainWindow::slot_about()
