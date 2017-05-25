@@ -5,7 +5,11 @@
 # include <QColor>
 # include <QList>
 
+class MainWindow;
 class DrawingPanel;
+class DrawingLattice;
+class DockLayers;
+struct Layer;
 
 class Paint : public QUndoCommand
 {
@@ -24,11 +28,14 @@ public:
 };
 
 // TODO
-class Resize : public QUndoCommand
+class AddLayer : public QUndoCommand
 {
+  MainWindow * w;
+
+  bool has_undo = false;
 
 public:
-  Resize();
+  AddLayer(MainWindow *);
 
   void undo() override;
 

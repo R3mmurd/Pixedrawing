@@ -29,8 +29,7 @@
 DrawingLattice::DrawingLattice(size_t r, size_t c)
   : rows(r), cols(c)
 {
-  layers.push_back(Layer(allocate_lattice(rows, cols, Qt::white),
-                         "Background"));
+  layers.push_back(Layer(rows, cols, "Background", Qt::white));
 }
 
 DrawingLattice::~DrawingLattice()
@@ -40,9 +39,6 @@ DrawingLattice::~DrawingLattice()
 
 void DrawingLattice::clear()
 {
-  for (Layer & l : layers)
-    free_lattice(l.mat, rows);
-
   layers.clear();
 }
 
@@ -236,20 +232,21 @@ void DrawingLattice::set_layer_name(DrawingLattice::LayerSet::size_type l,
   layers[l].name = n;
 }
 
-void DrawingLattice::add_layer_front()
+void DrawingLattice::add_new_layer()
 {
-  QString name = "layer_";
-  name.append(QString::number(layers.size()));
-  layers.push_front(Layer(allocate_lattice(rows, cols), name));
-  emit signal_layer_added(name);
+  push_layer();
 }
 
-void DrawingLattice::add_layer_back()
+void DrawingLattice::push_layer()
 {
   QString name = "layer_";
   name.append(QString::number(layers.size()));
-  layers.push_back(Layer(allocate_lattice(rows, cols), name));
-  emit signal_layer_added(name);
+  layers.push_front(Layer(rows, cols, name, Qt::transparent));
+}
+
+void DrawingLattice::pop_layer()
+{
+  layers.pop_front();
 }
 
 void DrawingLattice::remove_layer(DrawingLattice::LayerSet::size_type l)
@@ -257,17 +254,64 @@ void DrawingLattice::remove_layer(DrawingLattice::LayerSet::size_type l)
   for ( ; l < layers.size() - 1; ++l)
     std::swap(layers[l], layers[l + 1]);
 
-  free_lattice(layers.back().mat, rows);
   layers.pop_back();
 }
 
-DrawingLattice::Layer::Layer()
+Layer::Layer()
 {
   // empty, dummy constuctor
 }
 
-DrawingLattice::Layer::Layer(QColor ** l, const QString & n)
-  : mat(l), name(n)
+Layer::Layer(size_t r, size_t c, const QString & n, const QColor & color)
+  : rows(r), cols(c), mat(allocate_lattice(rows, cols, color)), name(n)
 {
-  // Empty
+  // empty
+}
+
+Layer::Layer(Layer && l)
+  : rows(0), cols(0), mat(nullptr), name(""), visible(false)
+{
+  std::swap(rows, l.rows);
+  std::swap(cols, l.cols);
+  std::swap(mat, l.mat);
+  std::swap(name, l.name);
+  std::swap(visible, l.visible);
+}
+
+Layer::Layer(const Layer & l)
+  : rows(l.rows), cols(l.cols), mat(copy_lattice(l.mat, rows, cols)),
+    name(l.name), visible(l.visible)
+{
+  // empty
+}
+
+Layer::~Layer()
+{
+  free_lattice(mat, rows);
+}
+
+Layer & Layer::operator = (const Layer & l)
+{
+  if (&l == this)
+    return *this;
+
+  free_lattice(mat, rows);
+
+  rows = l.rows;
+  cols = l.cols;
+  mat = copy_lattice(l.mat, rows, cols);
+  name = l.name;
+  visible = l.visible;
+
+  return *this;
+}
+
+Layer & Layer::operator = (Layer && l)
+{
+  std::swap(rows, l.rows);
+  std::swap(cols, l.cols);
+  std::swap(mat, l.mat);
+  std::swap(name, l.name);
+  std::swap(visible, l.visible);
+  return *this;
 }

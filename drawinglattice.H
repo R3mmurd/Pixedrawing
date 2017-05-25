@@ -30,22 +30,35 @@
 
 # include <helpers.H>
 
+struct Layer
+{
+  size_t rows = 0;
+  size_t cols = 0;
+  QColor ** mat = nullptr;
+  QString name = "";
+  bool visible = true;
+
+  Layer();
+
+  Layer(size_t, size_t, const QString &,
+        const QColor & color = Qt::transparent);
+
+  Layer(const Layer &);
+
+  Layer(Layer &&);
+
+  ~Layer();
+
+  Layer & operator = (const Layer &);
+
+  Layer & operator = (Layer &&);
+};
+
 class DrawingLattice : public QObject
 {
   Q_OBJECT
 
 public:
-  struct Layer
-  {
-    QColor ** mat = nullptr;
-    QString name = "";
-    bool visible = true;
-
-    Layer();
-
-    Layer(QColor **, const QString &);
-  };
-
   using LayerSet = QVector<Layer>;
 
 private:
@@ -91,16 +104,20 @@ public:
 
   void set_layer_name(LayerSet::size_type, const QString &);
 
-  void add_layer_front();
+  void add_new_layer();
 
-  void add_layer_back();
+  void push_layer();
+
+  void pop_layer();
 
   void remove_layer(LayerSet::size_type);
 
 signals:
   void signal_change_visibility(bool);
 
-  void signal_layer_added(QString);
+  void signal_layer_added(Layer *, int);
+
+  void signal_layer_removed(Layer, int);
 };
 
 # endif // DRAWINGLATTICE_H

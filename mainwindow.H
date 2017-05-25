@@ -118,6 +118,10 @@ public:
 
   void closeEvent(QCloseEvent *) override;
 
+  void add_layer();
+
+  void remove_layer(DrawingLattice::LayerSet::size_type);
+
 public slots:
   void slot_changed();
 

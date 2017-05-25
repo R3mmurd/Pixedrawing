@@ -1,5 +1,7 @@
 # include <undocommands.H>
 # include <drawingpanel.H>
+# include <docklayers.H>
+# include <mainwindow.H>
 
 Paint::Paint(DrawingPanel * p,
              const QList<std::tuple<QColor, size_t, size_t, size_t> > & pc)
@@ -31,3 +33,24 @@ void Paint::redo()
 
   undo();
 }
+
+AddLayer::AddLayer(MainWindow * _w)
+  : w(_w)
+{
+  // empty
+}
+
+void AddLayer::undo()
+{
+  w->remove_layer(0);
+  has_undo = true;
+}
+
+void AddLayer::redo()
+{
+  if (not has_undo)
+    return;
+
+  w->add_layer();
+}
+

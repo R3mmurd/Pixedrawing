@@ -425,6 +425,28 @@ void MainWindow::closeEvent(QCloseEvent *)
   close_work();
 }
 
+void MainWindow::add_layer()
+{
+  drawing_panel->get_lattice().add_new_layer();
+  dock_layers->add_layer_info(drawing_panel->get_layer_info(0));
+  action_remove_layer->setEnabled(true);
+  drawing_panel->repaint();
+  is_saved = false;
+}
+
+void MainWindow::remove_layer(DrawingLattice::LayerSet::size_type l)
+{
+  drawing_panel->get_lattice().remove_layer(l);
+  dock_layers->remove_layer_info(l);
+
+  drawing_panel->repaint();
+
+  if (drawing_panel->get_lattice().get_num_layers() == 0)
+    action_remove_layer->setEnabled(false);
+
+  is_saved = false;
+}
+
 void MainWindow::slot_changed()
 {
   is_saved = false;
@@ -622,25 +644,14 @@ void MainWindow::slot_update_zoom(double factor)
 
 void MainWindow::slot_new_layer()
 {
-  drawing_panel->get_lattice().add_layer_front();
-  dock_layers->add_layer_info(drawing_panel->get_layer_info(0));
-  action_remove_layer->setEnabled(true);
-  drawing_panel->repaint();
-  is_saved = false;
+  add_layer();
+  undo_stack.push(new AddLayer(this));
 }
 
 void MainWindow::slot_remove_layer()
 {
   int l = drawing_panel->get_current_layer();
-  drawing_panel->get_lattice().remove_layer(l);
-  dock_layers->remove_layer_info(l);
-
-  drawing_panel->repaint();
-
-  if (drawing_panel->get_lattice().get_num_layers() == 0)
-    action_remove_layer->setEnabled(false);
-
-  is_saved = false;
+  remove_layer(l);
 }
 
 void MainWindow::slot_about()

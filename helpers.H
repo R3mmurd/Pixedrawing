@@ -17,4 +17,6 @@ QColor ** allocate_lattice(size_t, size_t,
 
 void free_lattice(QColor **, size_t);
 
+QColor ** copy_lattice(QColor **, size_t, size_t);
+
 # endif // HELPERS_H
