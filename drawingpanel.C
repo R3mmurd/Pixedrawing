@@ -129,7 +129,6 @@ void DrawingPanel::mouseReleaseEvent(QMouseEvent *)
   if (painted_cells.isEmpty())
     return;
 
-  emit signal_changed();
   emit signal_painted(painted_cells);
   painted_cells.clear();
 }

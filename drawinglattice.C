@@ -133,6 +133,9 @@ void DrawingLattice::load_from_file(QString & filename)
     {
       Layer layer;
 
+      layer.rows = rows;
+      layer.cols = cols;
+
       QString::size_type sz;
       file.read(reinterpret_cast<char *>(&sz), sizeof(QString::size_type));
       char str[sz];
@@ -141,6 +144,7 @@ void DrawingLattice::load_from_file(QString & filename)
       file.read(reinterpret_cast<char *>(&layer.visible), sizeof(bool));
 
       layer.mat = allocate_lattice(rows, cols);
+
 
       for (size_t i = 0; i < rows; ++i)
         for (size_t j = 0; j < cols; ++j)
@@ -249,12 +253,26 @@ void DrawingLattice::pop_layer()
   layers.pop_front();
 }
 
-void DrawingLattice::remove_layer(DrawingLattice::LayerSet::size_type l)
+void DrawingLattice::insert_layer(const Layer & layer, LayerSet::size_type p)
+{
+  auto i = layers.size();
+  layers.push_back(layer);
+
+  while (i > 0 and i > p)
+    {
+      std::swap(layers[i-1], layers[i]);
+      --i;
+    }
+}
+
+Layer DrawingLattice::remove_layer(DrawingLattice::LayerSet::size_type l)
 {
   for ( ; l < layers.size() - 1; ++l)
     std::swap(layers[l], layers[l + 1]);
 
+  Layer ret_val = std::move(layers.back());
   layers.pop_back();
+  return ret_val;
 }
 
 Layer::Layer()

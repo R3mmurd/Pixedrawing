@@ -109,14 +109,24 @@ void DockLayers::add_layer_info(const QList<std::tuple<QString, bool>> & l)
 
 void DockLayers::add_layer_info(const std::tuple<QString, bool> & info)
 {
-  table->insertRow(0);
+  add_layer_info(info, 0);
+}
+
+void DockLayers::add_layer_info(const std::tuple<QString, bool> & info, int r)
+{
+  table->insertRow(r);
 
   CheckWidget * check_widget = new CheckWidget(std::get<1>(info), table);
-  table->setCellWidget(0, 0, check_widget);
+  table->setCellWidget(r, 0, check_widget);
   connect(check_widget, SIGNAL(signal_change_visibility(bool,QPoint)),
           this, SLOT(slot_change_visibility(bool,QPoint)));
-  table->setItem(0, 1, new QTableWidgetItem(std::get<0>(info)));
-  select_row(0);
+  table->setItem(r, 1, new QTableWidgetItem(std::get<0>(info)));
+  select_row(r);
+}
+
+void DockLayers::set_layer_name(const QString & name, int row)
+{
+  table->item(row, 1)->setText(name);
 }
 
 void DockLayers::remove_layer_info(int r)

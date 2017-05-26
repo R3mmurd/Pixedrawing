@@ -242,7 +242,7 @@ void MainWindow::save_file()
   {
     statusBar()->showMessage("Saving file...");
     drawing_panel->save_to_file(name);
-    is_saved = true;
+    saved = true;
     statusBar()->showMessage("File saved successfully",
                              DftValues::STATUS_BAR_TIME);
   }
@@ -258,7 +258,7 @@ void MainWindow::set_title()
 {
   QString title;
 
-  if (not is_saved)
+  if (not saved)
     title.append("*");
 
   title.append(QString::asprintf("Pixedrawing [%lu x %lu]",
@@ -289,19 +289,19 @@ void MainWindow::create_work()
   drawing_panel_wrapper->show();
   connect(drawing_panel_wrapper, SIGNAL(signal_zoom(double)),
           this, SLOT(slot_update_zoom(double)));
-  connect(drawing_panel, SIGNAL(signal_changed()), this, SLOT(slot_changed()));
   connect(drawing_panel,
           SIGNAL(signal_painted(QList<std::tuple<QColor, size_t, size_t,
                                 size_t>>)),
           this, SLOT(slot_painted(QList<std::tuple<QColor, size_t, size_t,
                                   size_t>>)));
   setCentralWidget(drawing_panel_wrapper);
+  saved = true;
   set_title();
 }
 
 void MainWindow::close_work()
 {
-  if (not is_saved)
+  if (not saved)
     {
       QString msg;
       msg.append("You have done some changes recently\n");
@@ -313,8 +313,6 @@ void MainWindow::close_work()
     }
   disconnect(drawing_panel_wrapper, SIGNAL(signal_zoom(double)),
              this, SLOT(slot_update_zoom(double)));
-  disconnect(drawing_panel, SIGNAL(signal_changed()),
-             this, SLOT(slot_changed()));
   disconnect(drawing_panel,
              SIGNAL(signal_painted(QList<std::tuple<QColor, size_t, size_t,
                                    size_t>>)),
@@ -325,6 +323,9 @@ void MainWindow::close_work()
   drawing_panel_wrapper->close();
   delete drawing_panel_wrapper;
   drawing_panel = nullptr;
+  undo_stack.clear();
+  action_undo->setEnabled(false);
+  action_redo->setEnabled(false);
 }
 
 int MainWindow::color_position(const QColor & color) const
@@ -393,7 +394,7 @@ void MainWindow::redim(size_t rows, size_t cols)
     }
 
   drawing_panel->redim(rows, cols);
-  is_saved = false;
+  saved = false;
 
   statusBar()->showMessage("Panel resized successfully",
                            DftValues::STATUS_BAR_TIME);
@@ -431,12 +432,12 @@ void MainWindow::add_layer()
   dock_layers->add_layer_info(drawing_panel->get_layer_info(0));
   action_remove_layer->setEnabled(true);
   drawing_panel->repaint();
-  is_saved = false;
+  saved = false;
 }
 
 void MainWindow::remove_layer(DrawingLattice::LayerSet::size_type l)
 {
-  drawing_panel->get_lattice().remove_layer(l);
+  Layer layer = drawing_panel->get_lattice().remove_layer(l);
   dock_layers->remove_layer_info(l);
 
   drawing_panel->repaint();
@@ -444,13 +445,25 @@ void MainWindow::remove_layer(DrawingLattice::LayerSet::size_type l)
   if (drawing_panel->get_lattice().get_num_layers() == 0)
     action_remove_layer->setEnabled(false);
 
-  is_saved = false;
+  undo_stack.push(new RemoveLayer(this, saved, drawing_panel, dock_layers,
+                                  layer, l));
+
+  saved = false;
 }
 
-void MainWindow::slot_changed()
+bool MainWindow::is_saved() const
 {
-  is_saved = false;
-  set_title();
+  return saved;
+}
+
+void MainWindow::set_saved_state(bool s)
+{
+  saved = s;
+}
+
+void MainWindow::set_action_remove_layer_enability(bool v)
+{
+  action_remove_layer->setEnabled(v);
 }
 
 void MainWindow::slot_new()
@@ -462,7 +475,7 @@ void MainWindow::slot_new()
 
 void MainWindow::slot_save()
 {
-  if (is_saved)
+  if (saved)
     return;
 
   if (name.isEmpty())
@@ -523,7 +536,7 @@ void MainWindow::slot_open()
     statusBar()->showMessage("Opening file...");
     drawing_panel->load_from_file(name);
     last_visited_path = QFileInfo(name).path();
-    is_saved = true;
+    saved = true;
     update_actions_redim();
     statusBar()->showMessage("File opened successfully",
                              DftValues::STATUS_BAR_TIME);
@@ -644,8 +657,8 @@ void MainWindow::slot_update_zoom(double factor)
 
 void MainWindow::slot_new_layer()
 {
+  undo_stack.push(new AddLayer(this, saved, drawing_panel, dock_layers));
   add_layer();
-  undo_stack.push(new AddLayer(this));
 }
 
 void MainWindow::slot_remove_layer()
@@ -667,7 +680,9 @@ void MainWindow::slot_about_qt()
 void MainWindow::slot_painted(
     QList<std::tuple<QColor, size_t, size_t, size_t>> l)
 {
-  undo_stack.push(new Paint(drawing_panel, l));
+  undo_stack.push(new Paint(this, saved, drawing_panel, l));
+  saved = false;
+  set_title();
 }
 
 void MainWindow::slot_can_undo(bool value)
@@ -690,7 +705,7 @@ void MainWindow::slot_change_layer_visibility(bool value, int l)
   else
     drawing_panel->get_lattice().hide_layer(l);
 
-  is_saved = false;
+  saved = false;
 }
 
 void MainWindow::slot_change_layer_name(QString name, int l)
@@ -698,8 +713,14 @@ void MainWindow::slot_change_layer_name(QString name, int l)
   if (drawing_panel->get_lattice().get_layer_name(l) == name)
     return;
 
+  QString n = std::get<0>(drawing_panel->get_layer_info(l));
+
+  undo_stack.push(new ChangeLayerName(this, saved, drawing_panel, dock_layers,
+                                      n, l));
+
   drawing_panel->get_lattice().set_layer_name(l, name);
-  is_saved = false;
+
+  saved = false;
 }
 
 void MainWindow::slot_change_selected_layer(int l)

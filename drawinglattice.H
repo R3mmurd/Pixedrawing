@@ -110,7 +110,9 @@ public:
 
   void pop_layer();
 
-  void remove_layer(LayerSet::size_type);
+  void insert_layer(const Layer &, LayerSet::size_type);
+
+  Layer remove_layer(LayerSet::size_type);
 
 signals:
   void signal_change_visibility(bool);

@@ -99,8 +99,6 @@ public:
   QList<std::tuple<QString, bool>> get_layer_info() const;
 
 signals:
-  void signal_changed();
-
   void signal_painted(QList<std::tuple<QColor, size_t, size_t, size_t>>);
 
 public slots:

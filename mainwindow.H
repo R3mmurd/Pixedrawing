@@ -41,7 +41,7 @@ class MainWindow : public QMainWindow
 
   QString last_visited_path;
 
-  bool is_saved = true;
+  bool saved = true;
 
   QString name = "";
 
@@ -122,9 +122,13 @@ public:
 
   void remove_layer(DrawingLattice::LayerSet::size_type);
 
-public slots:
-  void slot_changed();
+  bool is_saved() const;
 
+  void set_saved_state(bool);
+
+  void set_action_remove_layer_enability(bool);
+
+public slots:
   void slot_new();
 
   void slot_save();

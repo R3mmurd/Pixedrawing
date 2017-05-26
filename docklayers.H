@@ -69,6 +69,10 @@ public:
 
   void add_layer_info(const std::tuple<QString, bool> &);
 
+  void add_layer_info(const std::tuple<QString, bool> &, int);
+
+  void set_layer_name(const QString &, int);
+
   void remove_layer_info(int);
 
   void clear();
