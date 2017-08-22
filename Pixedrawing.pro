@@ -37,8 +37,8 @@ SOURCES += \
     drawingpanelwrapper.C \
     helpers.C \
     undocommands.C \
-    drawinglattice.C \
-    docklayers.C
+    docklayers.C \
+    layerset.C
 
 HEADERS += \
     drawingpanel.H \
@@ -48,8 +48,8 @@ HEADERS += \
     drawingpanelwrapper.H \
     helpers.H \
     undocommands.H \
-    drawinglattice.H \
-    docklayers.H
+    docklayers.H \
+    layerset.H
 
 FORMS += \
     customredimdialog.ui

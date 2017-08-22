@@ -21,28 +21,28 @@
 
   aledrums@gmail.com
 */
-# include <drawinglattice.H>
+# include <layerset.H>
 
 # include <QPainter>
 # include <QFile>
 
-DrawingLattice::DrawingLattice(size_t r, size_t c)
+LayerSet::LayerSet(size_t r, size_t c)
   : rows(r), cols(c)
 {
   layers.push_back(Layer(rows, cols, "Background", Qt::white));
 }
 
-DrawingLattice::~DrawingLattice()
+LayerSet::~LayerSet()
 {
   clear();
 }
 
-void DrawingLattice::clear()
+void LayerSet::clear()
 {
   layers.clear();
 }
 
-void DrawingLattice::redim(size_t r, size_t c)
+void LayerSet::redim(size_t r, size_t c)
 {
   size_t _r = std::min(r, rows);
   size_t _c = std::min(c, cols);
@@ -63,31 +63,31 @@ void DrawingLattice::redim(size_t r, size_t c)
   cols = c;
 }
 
-const size_t & DrawingLattice::get_rows() const
+const size_t & LayerSet::get_rows() const
 {
   return rows;
 }
 
-const size_t & DrawingLattice::get_cols() const
+const size_t & LayerSet::get_cols() const
 {
   return cols;
 }
 
-DrawingLattice::LayerSet::size_type DrawingLattice::get_num_layers() const
+LayerSet::LayerVector::size_type LayerSet::get_num_layers() const
 {
   return layers.size();
 }
 
-void DrawingLattice::save_to_file(QString & filename)
+void LayerSet::save_to_file(QString & filename)
 {
   QFile file(filename);
 
   if (not file.open(QIODevice::WriteOnly))
     throw std::runtime_error("Cannot create file");
 
-  LayerSet::size_type num_layers = layers.size();
+  LayerVector::size_type num_layers = layers.size();
 
-  file.write(reinterpret_cast<char *>(&num_layers),sizeof(LayerSet::size_type));
+  file.write(reinterpret_cast<char *>(&num_layers),sizeof(LayerVector::size_type));
   file.write(reinterpret_cast<char *>(&rows), sizeof(size_t));
   file.write(reinterpret_cast<char *>(&cols), sizeof(size_t));
 
@@ -114,7 +114,7 @@ void DrawingLattice::save_to_file(QString & filename)
   file.close();
 }
 
-void DrawingLattice::load_from_file(QString & filename)
+void LayerSet::load_from_file(QString & filename)
 {
   QFile file(filename);
 
@@ -123,13 +123,13 @@ void DrawingLattice::load_from_file(QString & filename)
 
   clear();
 
-  LayerSet::size_type num_layers;
+  LayerVector::size_type num_layers;
 
-  file.read(reinterpret_cast<char *>(&num_layers), sizeof(LayerSet::size_type));
+  file.read(reinterpret_cast<char *>(&num_layers), sizeof(LayerVector::size_type));
   file.read(reinterpret_cast<char *>(&rows), sizeof(size_t));
   file.read(reinterpret_cast<char *>(&cols), sizeof(size_t));
 
-  for (LayerSet::size_type l = 0; l < num_layers; ++l)
+  for (LayerVector::size_type l = 0; l < num_layers; ++l)
     {
       Layer layer;
 
@@ -166,11 +166,11 @@ void DrawingLattice::load_from_file(QString & filename)
   file.close();
 }
 
-QImage DrawingLattice::export_bitmap()
+QImage LayerSet::export_bitmap()
 {
   QImage ret_val(cols, rows, QImage::Format_ARGB32);
 
-  for (LayerSet::size_type l = layers.size(); l > 0; --l)
+  for (LayerVector::size_type l = layers.size(); l > 0; --l)
     for (size_t i = 0; i < rows; ++i)
       for (size_t j = 0; j < cols; ++j)
         ret_val.setPixelColor(j, i, layers[l-1].mat[i][j]);
@@ -178,19 +178,19 @@ QImage DrawingLattice::export_bitmap()
   return ret_val;
 }
 
-void DrawingLattice::paint(size_t l, size_t i, size_t j, const QColor & c)
+void LayerSet::paint(size_t l, size_t i, size_t j, const QColor & c)
 {
   layers[l].mat[i][j] = c;
 }
 
-const QColor & DrawingLattice::get_color(size_t l, size_t i, size_t j) const
+const QColor & LayerSet::get_color(size_t l, size_t i, size_t j) const
 {
   return layers[l].mat[i][j];
 }
 
-void DrawingLattice::draw(QPainter & painter, double w, double h)
+void LayerSet::draw(QPainter & painter, double w, double h)
 {
-  for (LayerSet::size_type l = layers.size(); l > 0; --l)
+  for (LayerVector::size_type l = layers.size(); l > 0; --l)
     {
       if (not layers[l-1].visible)
         continue;
@@ -201,7 +201,7 @@ void DrawingLattice::draw(QPainter & painter, double w, double h)
     }
 }
 
-void DrawingLattice::show_layer(LayerSet::size_type l)
+void LayerSet::show_layer(LayerVector::size_type l)
 {
   if (layers[l].visible)
     return;
@@ -210,7 +210,7 @@ void DrawingLattice::show_layer(LayerSet::size_type l)
   emit signal_change_visibility(true);
 }
 
-void DrawingLattice::hide_layer(LayerSet::size_type l)
+void LayerSet::hide_layer(LayerVector::size_type l)
 {
   if (not layers[l].visible)
     return;
@@ -219,41 +219,41 @@ void DrawingLattice::hide_layer(LayerSet::size_type l)
   emit signal_change_visibility(false);
 }
 
-bool DrawingLattice::is_layer_visible(LayerSet::size_type l) const
+bool LayerSet::is_layer_visible(LayerVector::size_type l) const
 {
   return layers[l].visible;
 }
 
 const QString &
-DrawingLattice::get_layer_name(DrawingLattice::LayerSet::size_type l) const
+LayerSet::get_layer_name(LayerSet::LayerVector::size_type l) const
 {
   return layers[l].name;
 }
 
-void DrawingLattice::set_layer_name(DrawingLattice::LayerSet::size_type l,
+void LayerSet::set_layer_name(LayerSet::LayerVector::size_type l,
                                     const QString & n)
 {
   layers[l].name = n;
 }
 
-void DrawingLattice::add_new_layer()
+void LayerSet::add_new_layer()
 {
   push_layer();
 }
 
-void DrawingLattice::push_layer()
+void LayerSet::push_layer()
 {
   QString name = "layer_";
   name.append(QString::number(layers.size()));
   layers.push_front(Layer(rows, cols, name, Qt::transparent));
 }
 
-void DrawingLattice::pop_layer()
+void LayerSet::pop_layer()
 {
   layers.pop_front();
 }
 
-void DrawingLattice::insert_layer(const Layer & layer, LayerSet::size_type p)
+void LayerSet::insert_layer(const Layer & layer, LayerVector::size_type p)
 {
   auto i = layers.size();
   layers.push_back(layer);
@@ -265,7 +265,7 @@ void DrawingLattice::insert_layer(const Layer & layer, LayerSet::size_type p)
     }
 }
 
-Layer DrawingLattice::remove_layer(DrawingLattice::LayerSet::size_type l)
+Layer LayerSet::remove_layer(LayerSet::LayerVector::size_type l)
 {
   for ( ; l < layers.size() - 1; ++l)
     std::swap(layers[l], layers[l + 1]);

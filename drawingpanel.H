@@ -27,7 +27,7 @@
 # include <QWidget>
 # include <QList>
 
-# include <drawinglattice.H>
+# include <layerset.H>
 
 class DrawingPanel : public QWidget
 {
@@ -37,11 +37,11 @@ public:
   static constexpr size_t SCALE = 8;
 
 private:
-  DrawingLattice lattice;
+  LayerSet lattice;
 
   double zoom_factor = 1.0;
 
-  DrawingLattice::LayerSet::size_type current_layer = 0;
+  LayerSet::LayerVector::size_type current_layer = 0;
 
   QColor color_to_paint = Qt::black;
 
@@ -87,14 +87,14 @@ public:
 
   void redim(size_t, size_t);
 
-  DrawingLattice & get_lattice();
+  LayerSet & get_lattice();
 
-  void set_current_layer(DrawingLattice::LayerSet::size_type);
+  void set_current_layer(LayerSet::LayerVector::size_type);
 
-  const DrawingLattice::LayerSet::size_type & get_current_layer() const;
+  const LayerSet::LayerVector::size_type & get_current_layer() const;
 
   std::tuple<QString, bool>
-  get_layer_info(DrawingLattice::LayerSet::size_type) const;
+  get_layer_info(LayerSet::LayerVector::size_type) const;
 
   QList<std::tuple<QString, bool>> get_layer_info() const;
 

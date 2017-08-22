@@ -209,24 +209,24 @@ void DrawingPanel::redim(size_t r, size_t c)
   adjust_size();
 }
 
-DrawingLattice &DrawingPanel::get_lattice()
+LayerSet &DrawingPanel::get_lattice()
 {
   return lattice;
 }
 
-void DrawingPanel::set_current_layer(DrawingLattice::LayerSet::size_type l)
+void DrawingPanel::set_current_layer(LayerSet::LayerVector::size_type l)
 {
   current_layer = l;
 }
 
-const DrawingLattice::LayerSet::size_type &
+const LayerSet::LayerVector::size_type &
 DrawingPanel::get_current_layer() const
 {
   return current_layer;
 }
 
 std::tuple<QString, bool>
-DrawingPanel::get_layer_info(DrawingLattice::LayerSet::size_type l) const
+DrawingPanel::get_layer_info(LayerSet::LayerVector::size_type l) const
 {
   return std::make_tuple(lattice.get_layer_name(l),
                          lattice.is_layer_visible(l));
@@ -236,7 +236,7 @@ QList<std::tuple<QString, bool>> DrawingPanel::get_layer_info() const
 {
   QList<std::tuple<QString, bool>> ret_val;
 
-  for (DrawingLattice::LayerSet::size_type l = 0;
+  for (LayerSet::LayerVector::size_type l = 0;
        l < lattice.get_num_layers(); ++l)
     ret_val.append(get_layer_info(l));
 

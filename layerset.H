@@ -21,8 +21,8 @@
 
   aledrums@gmail.com
 */
-# ifndef DRAWINGLATTICE_H
-# define DRAWINGLATTICE_H
+# ifndef LAYERSET_H
+# define LAYERSET_H
 
 # include <QColor>
 # include <QVector>
@@ -54,23 +54,23 @@ struct Layer
   Layer & operator = (Layer &&);
 };
 
-class DrawingLattice : public QObject
+class LayerSet : public QObject
 {
   Q_OBJECT
 
 public:
-  using LayerSet = QVector<Layer>;
+  using LayerVector = QVector<Layer>;
 
 private:
   size_t rows;
   size_t cols;
 
-  LayerSet layers;
+  LayerVector layers;
 
 public:
-  DrawingLattice(size_t, size_t);
+  LayerSet(size_t, size_t);
 
-  ~DrawingLattice();
+  ~LayerSet();
 
   void clear();
 
@@ -80,7 +80,7 @@ public:
 
   const size_t & get_cols() const;
 
-  LayerSet::size_type get_num_layers() const;
+  LayerVector::size_type get_num_layers() const;
 
   void save_to_file(QString &);
 
@@ -94,15 +94,15 @@ public:
 
   void draw(QPainter &, double, double);
 
-  void show_layer(LayerSet::size_type);
+  void show_layer(LayerVector::size_type);
 
-  void hide_layer(LayerSet::size_type);
+  void hide_layer(LayerVector::size_type);
 
-  bool is_layer_visible(LayerSet::size_type) const;
+  bool is_layer_visible(LayerVector::size_type) const;
 
-  const QString & get_layer_name(LayerSet::size_type) const;
+  const QString & get_layer_name(LayerVector::size_type) const;
 
-  void set_layer_name(LayerSet::size_type, const QString &);
+  void set_layer_name(LayerVector::size_type, const QString &);
 
   void add_new_layer();
 
@@ -110,9 +110,9 @@ public:
 
   void pop_layer();
 
-  void insert_layer(const Layer &, LayerSet::size_type);
+  void insert_layer(const Layer &, LayerVector::size_type);
 
-  Layer remove_layer(LayerSet::size_type);
+  Layer remove_layer(LayerVector::size_type);
 
 signals:
   void signal_change_visibility(bool);
@@ -122,4 +122,4 @@ signals:
   void signal_layer_removed(Layer, int);
 };
 
-# endif // DRAWINGLATTICE_H
+# endif // LAYERSET_H

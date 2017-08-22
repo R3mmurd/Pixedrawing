@@ -435,7 +435,7 @@ void MainWindow::add_layer()
   saved = false;
 }
 
-void MainWindow::remove_layer(DrawingLattice::LayerSet::size_type l)
+void MainWindow::remove_layer(LayerSet::LayerVector::size_type l)
 {
   Layer layer = drawing_panel->get_lattice().remove_layer(l);
   dock_layers->remove_layer_info(l);

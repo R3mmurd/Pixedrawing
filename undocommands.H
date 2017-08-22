@@ -7,7 +7,7 @@
 
 class MainWindow;
 class DrawingPanel;
-class DrawingLattice;
+class LayerSet;
 class DockLayers;
 struct Layer;
 

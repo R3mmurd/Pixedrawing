@@ -120,7 +120,7 @@ public:
 
   void add_layer();
 
-  void remove_layer(DrawingLattice::LayerSet::size_type);
+  void remove_layer(LayerSet::LayerVector::size_type);
 
   bool is_saved() const;
 
