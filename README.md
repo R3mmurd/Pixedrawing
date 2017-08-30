@@ -1,4 +1,4 @@
-Pixedrawing.
+# Pixedrawing
 
 A simple tool for drawing bitmaps pixel by pixel. Util for making game sprites.
 
