@@ -117,6 +117,7 @@ void MainWindow::init_actions()
   connect(action_zoom_out, SIGNAL(triggered(bool)),
           drawing_panel_wrapper, SLOT(slot_zoom_out()));
   action_zoom_1 = new QAction(QIcon(":icon/zoom-1"), "Original size", this);
+  action_zoom_1->setShortcut(tr("ctrl+0"));
   connect(action_zoom_1, SIGNAL(triggered(bool)),
           drawing_panel_wrapper, SLOT(slot_zoom_1()));
 
@@ -626,6 +627,7 @@ void MainWindow::slot_pick_color()
   QObject * sndr = sender();
 
   QColorDialog * color_dialog = new QColorDialog(this);
+  color_dialog->setOption(QColorDialog::ShowAlphaChannel);
 
   if (sndr == action_change_background_color)
     connect(color_dialog, SIGNAL(colorSelected(QColor)),
