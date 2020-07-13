@@ -30,6 +30,7 @@ void DrawingPanel::adjust_size()
 {
   resize(lattice.get_cols() * SCALE * zoom_factor,
          lattice.get_rows() * SCALE * zoom_factor);
+  setMouseTracking(true);
 }
 
 void DrawingPanel::paintEvent(QPaintEvent *)
@@ -90,16 +91,18 @@ void DrawingPanel::mousePressEvent(QMouseEvent * evt)
 
 void DrawingPanel::mouseMoveEvent(QMouseEvent * evt)
 {
+  const QPoint & pos = evt->pos();
+
+  size_t i = pos.y() / (SCALE * zoom_factor);
+  size_t j = pos.x() / (SCALE * zoom_factor);
+
+  emit signal_position(i + 1, j + 1);
+
   if (current_layer < 0)
     return;
 
   if (pressed_button != Qt::LeftButton and pressed_button != Qt::RightButton)
     return;
-
-  const QPoint & pos = evt->pos();
-
-  size_t i = pos.y() / (SCALE * zoom_factor);
-  size_t j = pos.x() / (SCALE * zoom_factor);
 
   if (i >= lattice.get_rows() or j >= lattice.get_cols())
     return;
@@ -126,6 +129,8 @@ void DrawingPanel::mouseMoveEvent(QMouseEvent * evt)
 
 void DrawingPanel::mouseReleaseEvent(QMouseEvent *)
 {
+  pressed_button = Qt::NoButton;
+
   if (painted_cells.isEmpty())
     return;
 

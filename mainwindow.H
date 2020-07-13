@@ -53,6 +53,8 @@ class MainWindow : public QMainWindow
 
   QUndoStack undo_stack;
 
+  QLabel * position_label;
+
   QAction * action_new;
   QAction * action_save;
   QAction * action_save_as;
@@ -177,6 +179,8 @@ public slots:
   void slot_change_layer_name(QString, int);
 
   void slot_change_selected_layer(int);
+
+  void slot_update_position(size_t, size_t);
 };
 
 # endif // MAINWINDOW_H

@@ -103,6 +103,8 @@ public:
 signals:
   void signal_painted(QList<std::tuple<QColor, size_t, size_t, size_t>>);
 
+  void signal_position(size_t, size_t);
+
 public slots:
   void slot_change_visibility(bool);
 };

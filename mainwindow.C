@@ -134,6 +134,9 @@ void MainWindow::init_actions()
   action_about_qt = new QAction("About Qt", this);
   connect(action_about_qt, SIGNAL(triggered(bool)),
           this, SLOT(slot_about_qt()));
+
+  position_label = new QLabel;
+  statusBar()->addPermanentWidget(position_label);
 }
 
 void MainWindow::init_menu()
@@ -303,6 +306,8 @@ void MainWindow::create_work()
                                 size_t>>)),
           this, SLOT(slot_painted(QList<std::tuple<QColor, size_t, size_t,
                                   size_t>>)));
+  connect(drawing_panel, SIGNAL(signal_position(size_t, size_t)),
+          this, SLOT(slot_update_position(size_t, size_t)));
   setCentralWidget(drawing_panel_wrapper);
   saved = true;
   set_title();
@@ -754,4 +759,13 @@ void MainWindow::slot_change_layer_name(QString name, int l)
 void MainWindow::slot_change_selected_layer(int l)
 {
   drawing_panel->set_current_layer(l);
+}
+
+void MainWindow::slot_update_position(size_t r , size_t c)
+{
+  QString position_text = "row: ";
+  position_text.append(QString().setNum(r));
+  position_text.append("; col: ");
+  position_text.append(QString().setNum(c));
+  position_label->setText(position_text);
 }
