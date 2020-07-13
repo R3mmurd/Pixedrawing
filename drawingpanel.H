@@ -67,6 +67,8 @@ public:
 
   void set_color_to_paint(const QColor &);
 
+  void change_background_color(const QColor &);
+
   void zoom_in();
 
   void zoom_out();

@@ -40,8 +40,7 @@ struct Layer
 
   Layer();
 
-  Layer(size_t, size_t, const QString &,
-        const QColor & color = Qt::transparent);
+  Layer(size_t, size_t, const QString &);
 
   Layer(const Layer &);
 
@@ -65,10 +64,12 @@ private:
   size_t rows;
   size_t cols;
 
+  QColor background_color;
+
   LayerVector layers;
 
 public:
-  LayerSet(size_t, size_t);
+  LayerSet(size_t, size_t, QColor bgcolor = Qt::white);
 
   ~LayerSet();
 
@@ -113,6 +114,10 @@ public:
   void insert_layer(const Layer &, LayerVector::size_type);
 
   Layer remove_layer(LayerVector::size_type);
+
+  QColor get_background_color() const;
+
+  void set_background_color(const QColor &);
 
 signals:
   void signal_change_visibility(bool);

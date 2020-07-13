@@ -151,6 +151,12 @@ void DrawingPanel::set_color_to_paint(const QColor & c)
   color_to_paint = c;
 }
 
+void DrawingPanel::change_background_color(const QColor & c)
+{
+  lattice.set_background_color(c);
+  repaint();
+}
+
 void DrawingPanel::zoom_in()
 {
   zoom_factor += 0.1;

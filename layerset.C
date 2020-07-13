@@ -26,10 +26,20 @@
 # include <QPainter>
 # include <QFile>
 
-LayerSet::LayerSet(size_t r, size_t c)
-  : rows(r), cols(c)
+QColor LayerSet::get_background_color() const
 {
-  layers.push_back(Layer(rows, cols, "Background", Qt::white));
+  return background_color;
+}
+
+void LayerSet::set_background_color(const QColor &value)
+{
+  background_color = value;
+}
+
+LayerSet::LayerSet(size_t r, size_t c, QColor bgcolor)
+  : rows(r), cols(c), background_color(bgcolor)
+{
+  layers.push_back(Layer(rows, cols, "Default"));
 }
 
 LayerSet::~LayerSet()
@@ -170,6 +180,10 @@ QImage LayerSet::export_bitmap()
 {
   QImage ret_val(cols, rows, QImage::Format_ARGB32);
 
+  for (size_t i = 0; i < rows; ++i)
+    for (size_t j = 0; j < cols; ++j)
+       ret_val.setPixelColor(j, i, background_color);
+
   for (LayerVector::size_type l = layers.size(); l > 0; --l)
     for (size_t i = 0; i < rows; ++i)
       for (size_t j = 0; j < cols; ++j)
@@ -191,6 +205,7 @@ const QColor & LayerSet::get_color(size_t l, size_t i, size_t j) const
 
 void LayerSet::draw(QPainter & painter, double w, double h)
 {
+  painter.fillRect(0, 0, cols*w, rows*h, background_color);
   for (LayerVector::size_type l = layers.size(); l > 0; --l)
     {
       if (not layers[l-1].visible)
@@ -246,7 +261,7 @@ void LayerSet::push_layer()
 {
   QString name = "layer_";
   name.append(QString::number(layers.size()));
-  layers.push_front(Layer(rows, cols, name, Qt::transparent));
+  layers.push_front(Layer(rows, cols, name));
 }
 
 void LayerSet::pop_layer()
@@ -281,8 +296,8 @@ Layer::Layer()
   // empty, dummy constuctor
 }
 
-Layer::Layer(size_t r, size_t c, const QString & n, const QColor & color)
-  : rows(r), cols(c), mat(allocate_lattice(rows, cols, color)), name(n)
+Layer::Layer(size_t r, size_t c, const QString & n)
+  : rows(r), cols(c), mat(allocate_lattice(rows, cols)), name(n)
 {
   // empty
 }

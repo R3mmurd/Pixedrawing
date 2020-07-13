@@ -64,6 +64,7 @@ class MainWindow : public QMainWindow
   QAction * action_redo;
   QAction * actions_redim[DftValues::NUM_DFT_REDIM_VALUES + 1];
   QAction * actions_pick_color[DftValues::NUM_RECENT_COLORS + 1];
+  QAction * action_change_background_color;
 
   QAction * action_show_dock_layers;
   QAction * action_zoom_in;
@@ -140,6 +141,8 @@ public slots:
   void slot_export();
 
   void slot_set_color(QColor);
+
+  void slot_change_background_color(QColor);
 
   void slot_set_recent_color();
 

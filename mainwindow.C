@@ -99,6 +99,10 @@ void MainWindow::init_actions()
               this, SLOT(slot_set_recent_color()));
     }
 
+  action_change_background_color = new QAction("Change background color", this);
+  connect(action_change_background_color, SIGNAL(triggered(bool)),
+          this, SLOT(slot_pick_color()));
+
   action_show_dock_layers = new QAction("Layers", this);
   action_show_dock_layers->setCheckable(true);
   action_show_dock_layers->setChecked(true);
@@ -165,6 +169,10 @@ void MainWindow::init_menu()
   menu_redim->addAction(actions_redim[DftValues::NUM_DFT_REDIM_VALUES]);
 
   menu_edit->addMenu(menu_redim);
+
+  menu_edit->addSeparator();
+  menu_edit->addAction(action_change_background_color);
+
   menuBar()->addMenu(menu_edit);
 
   menu_view = new QMenu("&View", this);
@@ -594,6 +602,16 @@ void MainWindow::slot_set_color(QColor c)
   statusBar()->showMessage(msg, DftValues::STATUS_BAR_TIME);
 }
 
+void MainWindow::slot_change_background_color(QColor c)
+{
+  drawing_panel->change_background_color(c);
+
+  QString msg = "Background color changed to ";
+  msg.append(c.name());
+
+  statusBar()->showMessage(msg, DftValues::STATUS_BAR_TIME);
+}
+
 void MainWindow::slot_set_recent_color()
 {
   QAction * sndr = static_cast<QAction *>(sender());
@@ -605,9 +623,17 @@ void MainWindow::slot_set_recent_color()
 
 void MainWindow::slot_pick_color()
 {
+  QObject * sndr = sender();
+
   QColorDialog * color_dialog = new QColorDialog(this);
-  connect(color_dialog, SIGNAL(colorSelected(QColor)),
-          this, SLOT(slot_set_color(QColor)));  
+
+  if (sndr == action_change_background_color)
+    connect(color_dialog, SIGNAL(colorSelected(QColor)),
+            this, SLOT(slot_change_background_color(QColor)));
+  else
+    connect(color_dialog, SIGNAL(colorSelected(QColor)),
+            this, SLOT(slot_set_color(QColor)));
+
   color_dialog->exec();
 }
 
