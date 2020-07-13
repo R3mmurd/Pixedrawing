@@ -173,7 +173,8 @@ QImage LayerSet::export_bitmap()
   for (LayerVector::size_type l = layers.size(); l > 0; --l)
     for (size_t i = 0; i < rows; ++i)
       for (size_t j = 0; j < cols; ++j)
-        ret_val.setPixelColor(j, i, layers[l-1].mat[i][j]);
+        if (layers[l-1].mat[i][j] != Qt::transparent)
+          ret_val.setPixelColor(j, i, layers[l-1].mat[i][j]);
 
   return ret_val;
 }

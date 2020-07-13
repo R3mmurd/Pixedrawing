@@ -203,9 +203,9 @@ const size_t & DrawingPanel::get_cols() const
   return lattice.get_cols();
 }
 
-void DrawingPanel::redim(size_t r, size_t c)
+void DrawingPanel::redim(size_t w, size_t h)
 {
-  lattice.redim(r, c);
+  lattice.redim(h, w);
   adjust_size();
 }
 

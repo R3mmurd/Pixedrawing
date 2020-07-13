@@ -32,5 +32,5 @@ CustomRedimDialog::CustomRedimDialog(QWidget * parent)
   validator->setRange(0, 1024);
   ui.edt_cols->setValidator(validator);
   ui.edt_rows->setValidator(validator);
-  ui.edt_rows->setFocus();
+  ui.edt_cols->setFocus();
 }

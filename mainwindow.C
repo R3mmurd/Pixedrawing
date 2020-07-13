@@ -375,9 +375,9 @@ void MainWindow::move_color_to_begin(int p)
   recent_colors[0] = color;
 }
 
-void MainWindow::redim(size_t rows, size_t cols)
+void MainWindow::redim(size_t width, size_t height)
 {
-  if (rows < drawing_panel->get_rows() or cols < drawing_panel->get_cols())
+  if (height < drawing_panel->get_rows() or width< drawing_panel->get_cols())
     {
       QString msg = "You might lost some pixels\n";
       msg.append("Do you want to continue?");
@@ -393,7 +393,7 @@ void MainWindow::redim(size_t rows, size_t cols)
         }
     }
 
-  drawing_panel->redim(rows, cols);
+  drawing_panel->redim(width, height);
   saved = false;
 
   statusBar()->showMessage("Panel resized successfully",
