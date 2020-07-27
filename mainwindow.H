@@ -36,6 +36,8 @@ class MainWindow : public QMainWindow
 
   QUndoStack undo_stack;
 
+  QLabel * position_label;
+
   QAction * action_new;
   QAction * action_save;
   QAction * action_save_as;
@@ -47,6 +49,7 @@ class MainWindow : public QMainWindow
   QAction * action_redo;
   QAction * actions_redim[DftValues::NUM_DFT_REDIM_VALUES + 1];
   QAction * actions_pick_color[DftValues::NUM_RECENT_COLORS + 1];
+  QAction * action_change_background_color;
 
   QAction * action_show_dock_layers;
   QAction * action_zoom_in;
@@ -124,6 +127,8 @@ public slots:
 
   void slot_set_color(QColor);
 
+  void slot_change_background_color(QColor);
+
   void slot_set_recent_color();
 
   void slot_pick_color();
@@ -157,6 +162,8 @@ public slots:
   void slot_change_layer_name(QString, int);
 
   void slot_change_selected_layer(int);
+
+  void slot_update_position(size_t, size_t);
 };
 
 # endif // MAINWINDOW_H
