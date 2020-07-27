@@ -50,6 +50,8 @@ public:
 
   void set_color_to_paint(const QColor &);
 
+  void change_background_color(const QColor &);
+
   void zoom_in();
 
   void zoom_out();
@@ -83,6 +85,8 @@ public:
 
 signals:
   void signal_painted(QList<std::tuple<QColor, size_t, size_t, size_t>>);
+
+  void signal_position(size_t, size_t);
 
 public slots:
   void slot_change_visibility(bool);
