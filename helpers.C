@@ -1,3 +1,9 @@
+/*
+  Pixedrawing.
+
+  Autor: Alejandro Mujica (aledrums@gmail.com)
+*/
+
 # include <helpers.H>
 
 const char * DftValues::FILE_EXT = "pxdr";

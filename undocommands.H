@@ -1,3 +1,9 @@
+/*
+  Pixedrawing.
+
+  Autor: Alejandro Mujica (aledrums@gmail.com)
+*/
+
 # ifndef UNDOCOMMANDS_H
 # define UNDOCOMMANDS_H
 

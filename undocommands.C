@@ -1,3 +1,9 @@
+/*
+  Pixedrawing.
+
+  Autor: Alejandro Mujica (aledrums@gmail.com)
+*/
+
 # include <undocommands.H>
 # include <drawingpanel.H>
 # include <docklayers.H>

@@ -1,3 +1,9 @@
+/*
+  Pixedrawing.
+
+  Autor: Alejandro Mujica (aledrums@gmail.com)
+*/
+
 # ifndef HELPERS_H
 # define HELPERS_H
 
