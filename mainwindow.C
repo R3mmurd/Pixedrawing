@@ -537,6 +537,7 @@ void MainWindow::slot_open()
     update_actions_redim();
     statusBar()->showMessage("File opened successfully",
                              DftValues::STATUS_BAR_TIME);
+    set_title();
   }
   catch (const std::exception & e)
   {

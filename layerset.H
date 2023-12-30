@@ -10,6 +10,7 @@
 # include <QColor>
 # include <QVector>
 # include <QImage>
+# include <QObject>
 
 # include <helpers.H>
 

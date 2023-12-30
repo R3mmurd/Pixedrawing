@@ -8,6 +8,7 @@
 # define CUSTOMREDIMDIALOG_H
 
 # include <QDialog>
+# include <QIntValidator>
 # include <ui_customredimdialog.h>
 
 class CustomRedimDialog : public QDialog
